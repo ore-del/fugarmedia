@@ -15,6 +15,12 @@
   --foreground: #ffffff;
 }
 
+html, body {
+  height: 100%;
+  /* prevent double scrollbar when snap container is active */
+  overflow: hidden;
+}
+
 html {
   scroll-behavior: smooth;
 }
@@ -25,6 +31,12 @@ body {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
+
+/* Snap utilities used by ServiceSections */
+.snap-y { scroll-snap-type: y var(--scroll-snap-strictness, mandatory); }
+.snap-mandatory { --scroll-snap-strictness: mandatory; }
+.snap-start { scroll-snap-align: start; }
+.snap-always { scroll-snap-stop: always; }
 
 /* ── Marquee ── */
 @keyframes marquee {
