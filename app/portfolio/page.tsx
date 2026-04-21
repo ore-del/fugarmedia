@@ -1,6 +1,8 @@
 import { Metadata } from "next";
 import Link from "next/link";
 import { Play, ArrowRight, ExternalLink } from "lucide-react";
+import Navigation from "@/components/Navigation";
+import Footer from "@/components/Footer";
 
 export const metadata: Metadata = {
   title: "Portfolio | Fugar Media",
@@ -25,6 +27,7 @@ const placeholderItems = [
 export default function PortfolioPage() {
   return (
     <>
+      <Navigation />
       {/* Hero */}
       <section className="pt-32 pb-16 bg-[#080808]">
         <div className="max-w-7xl mx-auto px-6 lg:px-10">
@@ -171,6 +174,7 @@ export default function PortfolioPage() {
           </Link>
         </div>
       </section>
+      <Footer />
     </>
   );
 }

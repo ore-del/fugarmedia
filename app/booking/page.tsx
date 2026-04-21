@@ -1,6 +1,8 @@
 import { Metadata } from "next";
 import Link from "next/link";
 import { Mail, Phone, ExternalLink, ArrowRight, CheckCircle } from "lucide-react";
+import Navigation from "@/components/Navigation";
+import Footer from "@/components/Footer";
 
 export const metadata: Metadata = {
   title: "Book a Call | Fugar Media",
@@ -18,6 +20,7 @@ const packages = [
 export default function BookingPage() {
   return (
     <>
+      <Navigation />
       {/* Hero */}
       <section className="pt-32 pb-16 bg-[#080808] relative overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-br from-[#FF6200]/5 via-transparent to-transparent pointer-events-none" />
@@ -159,6 +162,7 @@ export default function BookingPage() {
           </Link>
         </div>
       </section>
+      <Footer />
     </>
   );
 }
