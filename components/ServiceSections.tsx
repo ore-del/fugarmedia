@@ -356,7 +356,7 @@ export default function ServiceSections() {
               href="/booking"
               className="inline-flex items-center gap-2 bg-[#FF6200] hover:bg-[#FF8340] text-white text-xs font-bold tracking-[0.2em] uppercase px-10 py-4 transition-colors duration-200 group mb-20"
             >
-              Book a Strategy Call
+              Book a Consultation
               <ArrowRight size={14} className="group-hover:translate-x-0.5 transition-transform" />
             </Link>
 
