@@ -1,8 +1,6 @@
 import type { Metadata } from "next";
 import { Montserrat, Bebas_Neue } from "next/font/google";
 import "./globals.css";
-import Navigation from "@/components/Navigation";
-import Footer from "@/components/Footer";
 
 const montserrat = Montserrat({
   subsets: ["latin"],
@@ -38,9 +36,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       className={`${montserrat.variable} ${bebasNeue.variable}`}
     >
       <body className="font-[family-name:var(--font-montserrat)] min-h-screen flex flex-col">
-        <Navigation />
-        <main className="flex-1">{children}</main>
-        <Footer />
+        {children}
       </body>
     </html>
   );
