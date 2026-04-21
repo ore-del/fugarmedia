@@ -26,27 +26,62 @@ body {
   -moz-osx-font-smoothing: grayscale;
 }
 
+/* ── Marquee ── */
+@keyframes marquee {
+  from { transform: translateX(0); }
+  to   { transform: translateX(-50%); }
+}
+.marquee-track {
+  display: flex;
+  width: max-content;
+  animation: marquee 22s linear infinite;
+}
+
+/* ── Fade in ── */
 @keyframes fadeUp {
-  from { opacity: 0; transform: translateY(28px); }
+  from { opacity: 0; transform: translateY(32px); }
   to   { opacity: 1; transform: translateY(0); }
 }
+.animate-fade-up                   { animation: fadeUp 1s ease forwards; }
+.animate-delay-1 { opacity: 0; animation: fadeUp 1s ease 0.18s forwards; }
+.animate-delay-2 { opacity: 0; animation: fadeUp 1s ease 0.36s forwards; }
+.animate-delay-3 { opacity: 0; animation: fadeUp 1s ease 0.54s forwards; }
+.animate-delay-4 { opacity: 0; animation: fadeUp 1s ease 0.72s forwards; }
 
-.animate-fade-up {
-  animation: fadeUp 0.9s ease forwards;
+/* ── Service row hover line ── */
+.service-row {
+  position: relative;
+}
+.service-row::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: #FF6200;
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+  z-index: 0;
+}
+.service-row:hover::before {
+  transform: scaleX(1);
+}
+.service-row > * {
+  position: relative;
+  z-index: 1;
 }
 
-.animate-delay-1 { animation-delay: 0.15s; opacity: 0; }
-.animate-delay-2 { animation-delay: 0.3s;  opacity: 0; }
-.animate-delay-3 { animation-delay: 0.45s; opacity: 0; }
-.animate-delay-4 { animation-delay: 0.6s;  opacity: 0; }
-
+/* ── Skeleton ── */
 @keyframes shimmer {
   0%   { background-position: -200% 0; }
   100% { background-position: 200% 0; }
 }
-
 .skeleton {
   background: linear-gradient(90deg, #1c1c1c 25%, #2a2a2a 50%, #1c1c1c 75%);
   background-size: 200% 100%;
   animation: shimmer 1.8s infinite;
+}
+
+/* ── Cursor blend ── */
+.blend-diff {
+  mix-blend-mode: difference;
 }
