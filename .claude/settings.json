@@ -1,0 +1,18 @@
+{
+  "extraKnownMarketplaces": {
+    "anthropic-agent-skills": {
+      "source": "github",
+      "repo": "anthropics/skills"
+    },
+    "ui-ux-pro-max-skill": {
+      "source": "github",
+      "repo": "nextlevelbuilder/ui-ux-pro-max-skill"
+    }
+  },
+  "enabledPlugins": {
+    "document-skills@anthropic-agent-skills": true,
+    "example-skills@anthropic-agent-skills": true,
+    "ui-ux-pro-max@ui-ux-pro-max-skill": true,
+    "figma@claude-plugins-official": true
+  }
+}
