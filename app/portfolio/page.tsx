@@ -169,7 +169,7 @@ export default function PortfolioPage() {
             href="/booking"
             className="inline-flex items-center gap-2 bg-[#FF6200] hover:bg-[#FF8340] text-white text-sm font-bold tracking-wider uppercase px-8 py-4 transition-colors duration-200 group"
           >
-            Book a Strategy Call
+            Book a Consultation
             <ArrowRight size={16} className="group-hover:translate-x-1 transition-transform" />
           </Link>
         </div>
