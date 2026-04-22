@@ -544,11 +544,14 @@ export default function ServiceSections() {
                             {slide.proj.videoUrl && (
                               <button
                                 onClick={() => setVideoModal(slide.proj.videoUrl!)}
-                                className="mb-4 w-14 h-14 border border-white/40 flex items-center justify-center text-white hover:border-[#F58A2C] hover:text-[#F58A2C] transition-colors duration-200"
+                                className="mb-4 text-white hover:text-[#F58A2C] transition-colors duration-200"
                               >
-                                <svg xmlns="http://www.w3.org/2000/svg" height="28px" viewBox="0 -960 960 960" width="28px" fill="currentColor">
-                                  <path d="M320-258v-450q0-14 9-22t21-8q4 0 8 1t8 3l354 226q7 5 10.5 11t3.5 14q0 8-3.5 14T720-458L366-232q-4 2-8 3t-8 1q-12 0-21-8t-9-22Z"/>
-                                </svg>
+                                <span
+                                  className="material-symbols-rounded"
+                                  style={{ fontSize: "64px", fontVariationSettings: "'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 48" }}
+                                >
+                                  play_circle
+                                </span>
                               </button>
                             )}
 
