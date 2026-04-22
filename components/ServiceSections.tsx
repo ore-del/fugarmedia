@@ -153,16 +153,33 @@ function getThumb(videoUrl?: string): string | null {
   return id ? `https://img.youtube.com/vi/${id}/maxresdefault.jpg` : null;
 }
 
+// Nav logo dimensions — splash logo is the same element scaled up then back
+const NAV_LOGO_W = 128; // px  (w-32)
+const NAV_LOGO_H = 36;  // px  (h-9)
+const NAV_TOP    = 20;  // px  (py-5)
+
 export default function ServiceSections() {
   // ── Splash animation state ──────────────────────────────────────────────
-  // 'visible'  → full-screen logo shown
-  // 'animating'→ logo flying to nav, overlay fading
-  // 'hidden'   → splash removed, nav + page visible
+  // 'visible'  → logo fills screen
+  // 'animating'→ logo shrinks back to nav, overlay fades
+  // 'hidden'   → splash done, normal nav visible
   const [splashPhase, setSplashPhase] = useState<"visible" | "animating" | "hidden">("visible");
 
+  // Scale + Y-offset to transform nav-sized logo → fills viewport
+  const [splashScale, setSplashScale] = useState(10);
+  const [splashDy, setSplashDy] = useState(350);
+
   useEffect(() => {
-    const t1 = setTimeout(() => setSplashPhase("animating"), 1600);
-    const t2 = setTimeout(() => setSplashPhase("hidden"), 2900);
+    const w = window.innerWidth;
+    const h = window.innerHeight;
+    const scale = Math.min(w / NAV_LOGO_W, h / NAV_LOGO_H) * 0.9;
+    const navLogoCenterY = NAV_TOP + NAV_LOGO_H / 2;
+    const dy = h / 2 - navLogoCenterY;
+    setSplashScale(scale);
+    setSplashDy(dy);
+
+    const t1 = setTimeout(() => setSplashPhase("animating"), 1800);
+    const t2 = setTimeout(() => setSplashPhase("hidden"), 3000);
     return () => { clearTimeout(t1); clearTimeout(t2); };
   }, []);
 
@@ -278,30 +295,33 @@ export default function ServiceSections() {
           className="fixed inset-0 z-[500] bg-black pointer-events-none"
           style={{
             opacity: splashPhase === "visible" ? 1 : 0,
-            transition: splashPhase === "animating" ? "opacity 1s ease 0.15s" : "none",
+            transition: splashPhase === "animating" ? "opacity 0.9s ease 0.1s" : "none",
           }}
         />
       )}
 
-      {/* ── Splash: logo flying to nav ───────────────────────────────────── */}
+      {/* ── Splash logo — same image/size as nav logo, scaled up to fill screen ── */}
       {splashPhase !== "hidden" && (
         <div
           className="fixed z-[501] pointer-events-none"
           style={{
+            top: `${NAV_TOP}px`,
             left: "50%",
-            top: splashPhase === "visible" ? "50%" : "20px",
-            width: "min(72vw, 340px)",
-            height: "min(40vw, 190px)",
+            width: `${NAV_LOGO_W}px`,
+            height: `${NAV_LOGO_H}px`,
+            transformOrigin: "center center",
             transform: splashPhase === "visible"
-              ? "translateX(-50%) translateY(-50%)"
-              : "translateX(-50%) translateY(0) scale(0.30)",
+              ? `translateX(-50%) translateY(${splashDy}px) scale(${splashScale})`
+              : "translateX(-50%) translateY(0px) scale(1)",
             opacity: splashPhase === "animating" ? 0 : 1,
             transition: splashPhase === "animating"
-              ? "top 1s cubic-bezier(0.16,1,0.3,1), transform 1s cubic-bezier(0.16,1,0.3,1), opacity 0.65s ease 0.35s"
+              ? "transform 1.1s cubic-bezier(0.16,1,0.3,1), opacity 0.7s ease 0.4s"
               : "none",
           }}
         >
-          <Image src="/logo2.png" alt="FUGAR" fill className="object-contain" priority />
+          <div style={{ position: "relative", width: NAV_LOGO_W, height: NAV_LOGO_H }}>
+            <Image src="/logo2.png" alt="FUGAR" fill className="object-contain" priority />
+          </div>
         </div>
       )}
 
@@ -310,7 +330,7 @@ export default function ServiceSections() {
         className="fixed top-0 left-0 right-0 z-50 flex items-center justify-center py-5 pointer-events-none"
         style={{
           opacity: splashPhase === "hidden" ? 1 : 0,
-          transition: "opacity 0.5s ease",
+          transition: splashPhase === "hidden" ? "opacity 0.4s ease" : "none",
         }}
       >
         <Link href="/" className="pointer-events-auto relative h-9 w-32">
@@ -335,18 +355,10 @@ export default function ServiceSections() {
           className="relative snap-start snap-always bg-black flex flex-col items-center justify-center"
           style={{ height: "100dvh" }}
         >
-          {/* Large logo */}
-          <div
-            className="relative mb-8"
-            style={{ width: "min(68vw, 340px)", height: "min(38vw, 190px)" }}
-          >
-            <Image src="/logo2.png" alt="FUGAR" fill className="object-contain" priority />
-          </div>
-
-          {/* Tagline */}
+          {/* Tagline — Anton font, fills the screen width like the screenshot */}
           <p
-            className="font-[family-name:var(--font-bebas)] text-[#F58A2C] text-center leading-[0.92] tracking-wide px-8"
-            style={{ fontSize: "clamp(1.5rem, 5vw, 3.2rem)", maxWidth: "680px" }}
+            className="font-[family-name:var(--font-anton)] text-[#F58A2C] text-center leading-[1.05] px-6 sm:px-10"
+            style={{ fontSize: "clamp(2.4rem, 7.5vw, 6rem)", maxWidth: "900px" }}
           >
             Documenting the Human Experience in the Most Beautiful Way Possible
           </p>
