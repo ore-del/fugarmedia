@@ -29,6 +29,7 @@ type ServiceDef = {
   packages: PricingPackage[];
   projects: Project[];
   sectionVideo?: string;
+  sectionImage?: string;
 };
 
 const SERVICES: ServiceDef[] = [
@@ -74,6 +75,7 @@ const SERVICES: ServiceDef[] = [
     heading: ["REELS &", "CONTENT"],
     price: "$800",
     description: "High-impact short-form content optimized for social platforms.",
+    sectionVideo: "https://www.youtube.com/shorts/UbJLWJTDEis",
     packages: [
       {
         name: "Content Pack",
@@ -88,9 +90,9 @@ const SERVICES: ServiceDef[] = [
       },
     ],
     projects: [
-      { title: "Reel 1", description: "Fast-paced social content optimized for Instagram Reels and TikTok.", client: "Creator / Brand", year: "2024", videoUrl: "https://www.youtube.com/shorts/UbJLWJTDEis" },
-      { title: "Reel 2", description: "Behind-the-scenes brand content capturing authentic moments and highlights.", client: "Creator / Brand", year: "2024" },
-      { title: "Reel 3", description: "Lifestyle reel series featuring the artist in dynamic urban environments.", client: "Creator / Brand", year: "2024" },
+      { title: "Reel 1", description: "Fast-paced social content optimized for Instagram Reels and TikTok.", client: "Creator / Brand", year: "2024", videoUrl: "https://www.youtube.com/shorts/H5FKcoQzwvA" },
+      { title: "Reel 2", description: "Behind-the-scenes brand content capturing authentic moments and highlights.", client: "Creator / Brand", year: "2024", videoUrl: "https://www.youtube.com/shorts/TWwbAe-HRWA" },
+      { title: "Reel 3", description: "Lifestyle reel series featuring the artist in dynamic urban environments.", client: "Creator / Brand", year: "2024", videoUrl: "https://www.youtube.com/shorts/ijXfsL9Aqas" },
     ],
   },
   {
@@ -98,6 +100,7 @@ const SERVICES: ServiceDef[] = [
     heading: ["LIVE DJ", "SESSIONS"],
     price: "$600",
     description: "Professional multi-camera capture of live DJ performances.",
+    sectionVideo: "https://youtu.be/mzu5kHKFkqs",
     packages: [
       {
         name: "Session",
@@ -112,9 +115,9 @@ const SERVICES: ServiceDef[] = [
       },
     ],
     projects: [
-      { title: "DJ Set 1", description: "Multi-camera live session at an intimate venue with professional audio mix.", client: "DJ Name", year: "2024", videoUrl: "https://youtu.be/mzu5kHKFkqs" },
-      { title: "DJ Set 2", description: "High-energy rooftop performance captured with cinematic drone and ground angles.", client: "DJ Name", year: "2024" },
-      { title: "DJ Set 3", description: "Studio livestream session featuring guest appearances and exclusive transitions.", client: "DJ Name", year: "2024" },
+      { title: "DJ Set 1", description: "Multi-camera live session at an intimate venue with professional audio mix.", client: "DJ Name", year: "2024", videoUrl: "https://youtu.be/dHU8B76kR_s" },
+      { title: "DJ Set 2", description: "High-energy rooftop performance captured with cinematic drone and ground angles.", client: "DJ Name", year: "2024", videoUrl: "https://youtu.be/A_GJkmn8B4I" },
+      { title: "DJ Set 3", description: "Studio livestream session featuring guest appearances and exclusive transitions.", client: "DJ Name", year: "2024", videoUrl: "https://youtu.be/pRnr9hRooAM" },
     ],
   },
   {
@@ -122,6 +125,7 @@ const SERVICES: ServiceDef[] = [
     heading: ["EDITORIALS &", "PHOTOSHOOTS"],
     price: "$600",
     description: "Editorial and artistic photography for artists and brands.",
+    sectionImage: "/editorials/editorial-intro.jpg",
     packages: [
       {
         name: "Shoot",
@@ -182,6 +186,7 @@ export default function ServiceSections() {
   const [visible, setVisible] = useState<Set<string>>(new Set());
   const [sectionFlash, setSectionFlash] = useState(false);
   const [thanksVisible, setThanksVisible] = useState(false);
+  const [sectionInView, setSectionInView] = useState<Set<string>>(new Set());
   const scrollRef = useRef<HTMLDivElement>(null);
 
   const slideMapRef = useRef<Record<string, number>>(
@@ -217,6 +222,7 @@ export default function ServiceSections() {
         ([entry]) => {
           if (entry.isIntersecting) {
             setVisible((prev) => new Set([...prev, svc.id]));
+            setSectionInView((prev) => new Set([...prev, svc.id]));
             if (!hasAutoAdvancedRef.current[svc.id]) {
               hasAutoAdvancedRef.current[svc.id] = true;
               autoAdvanceTimerRef.current[svc.id] = setTimeout(() => {
@@ -225,6 +231,12 @@ export default function ServiceSections() {
                 startTitleHideTimer(svc.id);
               }, 3000);
             }
+          } else {
+            setSectionInView((prev) => {
+              const next = new Set(prev);
+              next.delete(svc.id);
+              return next;
+            });
           }
         },
         { threshold: 0.45, root: scrollRef.current }
@@ -417,6 +429,7 @@ export default function ServiceSections() {
         {SERVICES.map((svc, svcIdx) => {
           const currentSlide = slideMap[svc.id];
           const isVis = visible.has(svc.id);
+          const isInView = sectionInView.has(svc.id);
           const isTitleVisible = titleVisible[svc.id];
           const totalSlides = svc.projects.length + 1;
 
@@ -425,6 +438,15 @@ export default function ServiceSections() {
             ...svc.projects.map((p) => ({ isIntro: false as const, proj: p })),
           ];
 
+          // Compute active background source
+          const activeBgVideo = currentSlide === 0
+            ? (svc.sectionVideo ?? null)
+            : (svc.projects[currentSlide - 1]?.videoUrl ?? null);
+          const activeBgImage = currentSlide === 0
+            ? (svc.sectionImage ?? null)
+            : (svc.projects[currentSlide - 1]?.image ?? null);
+          const activeBgVideoId = activeBgVideo ? getYouTubeId(activeBgVideo) : null;
+
           return (
             <section
               id={`svc-${svc.id}`}
@@ -432,6 +454,26 @@ export default function ServiceSections() {
               className="relative snap-start snap-always bg-black flex flex-col items-center justify-center overflow-hidden"
               style={{ height: "100dvh" }}
             >
+              {/* ── Full-section background — video (autoplay muted) or image ── */}
+              {isInView && activeBgVideoId && (
+                <div className="absolute inset-0 pointer-events-none overflow-hidden">
+                  <iframe
+                    key={activeBgVideoId}
+                    src={`https://www.youtube.com/embed/${activeBgVideoId}?autoplay=1&mute=1&loop=1&playlist=${activeBgVideoId}&controls=0&showinfo=0&rel=0&modestbranding=1&playsinline=1`}
+                    className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2"
+                    style={{ width: "177.78vh", height: "100vh", minWidth: "100%", minHeight: "56.25vw" }}
+                    allow="autoplay"
+                    title="Background video"
+                  />
+                </div>
+              )}
+              {isInView && !activeBgVideoId && activeBgImage && (
+                <div className="absolute inset-0">
+                  <Image src={activeBgImage} alt="" fill className="object-cover" />
+                </div>
+              )}
+              <div className="absolute inset-0 bg-black/52 pointer-events-none" />
+
               <button
                 onClick={() => navigate(svc.id, "prev")}
                 aria-label="Previous"
@@ -450,27 +492,24 @@ export default function ServiceSections() {
 
               {/* Entrance wrapper */}
               <div
-                className="flex flex-col items-center w-full"
+                className="relative z-10 flex flex-col items-center w-full"
                 style={{
                   transition: "opacity 0.75s cubic-bezier(0.16,1,0.3,1), transform 0.75s cubic-bezier(0.16,1,0.3,1)",
                   opacity: isVis ? 1 : 0,
                   transform: isVis ? "translateY(0)" : "translateY(28px)",
                 }}
               >
-                {/* Slide area */}
+                {/* Slide content — horizontal animation, no background (bg is section-level) */}
                 <div
                   className="relative overflow-hidden w-full"
-                  style={{ height: "min(340px, 50vh)" }}
+                  style={{ height: "min(280px, 40vh)" }}
                 >
                   {slides.map((slide, i) => {
                     const delta = i - currentSlide;
-                    const bgSrc = slide.isIntro
-                      ? (svc.sectionVideo ? getThumb(svc.sectionVideo) : null)
-                      : (slide.proj.videoUrl ? getThumb(slide.proj.videoUrl) : slide.proj.image ?? null);
                     return (
                       <div
                         key={i}
-                        className="absolute inset-0"
+                        className="absolute inset-0 flex flex-col items-center justify-center text-center px-8"
                         style={{
                           transform: `translateX(${delta * 110}%)`,
                           opacity: delta === 0 ? 1 : 0,
@@ -478,72 +517,53 @@ export default function ServiceSections() {
                           pointerEvents: delta === 0 ? "auto" : "none",
                         }}
                       >
-                        {/* Full-slide background */}
-                        {bgSrc && (
+                        {slide.isIntro ? (
                           <>
-                            <Image src={bgSrc} alt="" fill className="object-cover" />
-                            <div className="absolute inset-0 bg-black/55" />
+                            {svc.heading.map((line, li) => (
+                              <h2
+                                key={li}
+                                className="font-[family-name:var(--font-bebas)] leading-[0.88] tracking-[0.02em] text-white"
+                                style={{ fontSize: "clamp(2.5rem, 11vw, 8rem)" }}
+                              >
+                                {line}
+                              </h2>
+                            ))}
+                            <p className="text-white text-xs tracking-[0.2em] uppercase font-light mt-3">
+                              {svc.price}
+                            </p>
+                          </>
+                        ) : (
+                          <>
+                            {/* Play button — opens modal with audio */}
+                            {slide.proj.videoUrl && (
+                              <button
+                                onClick={() => setVideoModal(slide.proj.videoUrl!)}
+                                className="mb-4 w-14 h-14 border border-white/40 flex items-center justify-center hover:border-[#F58A2C] hover:text-[#F58A2C] transition-colors duration-200"
+                              >
+                                <Play size={20} fill="currentColor" />
+                              </button>
+                            )}
+
+                            {/* Title — fades out after 5s */}
+                            <h2
+                              className="font-[family-name:var(--font-bebas)] leading-[0.88] tracking-[0.02em] text-white"
+                              style={{
+                                fontSize: "clamp(2.5rem, 11vw, 8rem)",
+                                opacity: isTitleVisible ? 1 : 0,
+                                transition: "opacity 1s ease",
+                              }}
+                            >
+                              {slide.proj.title}
+                            </h2>
+
+                            {/* Description — fades out after 5s */}
+                            <div style={{ opacity: isTitleVisible ? 1 : 0, transition: "opacity 1s ease" }}>
+                              <p className="text-white/60 text-sm mt-2 max-w-sm truncate">
+                                {slide.proj.description}
+                              </p>
+                            </div>
                           </>
                         )}
-
-                        {/* Content overlay */}
-                        <div className="absolute inset-0 flex flex-col items-center justify-center text-center px-6">
-                          {slide.isIntro ? (
-                            <>
-                              {svc.heading.map((line, li) => (
-                                <h2
-                                  key={li}
-                                  className="font-[family-name:var(--font-bebas)] leading-[0.88] tracking-[0.02em] text-white"
-                                  style={{ fontSize: "clamp(2.5rem, 11vw, 8rem)" }}
-                                >
-                                  {line}
-                                </h2>
-                              ))}
-                              <p className="text-white text-xs tracking-[0.2em] uppercase font-light mt-3">
-                                {svc.price}
-                              </p>
-                              {svc.sectionVideo && (
-                                <button
-                                  onClick={() => setVideoModal(svc.sectionVideo!)}
-                                  className="mt-5 w-11 h-11 border border-white/40 flex items-center justify-center hover:border-[#F58A2C] hover:text-[#F58A2C] transition-colors duration-200"
-                                >
-                                  <Play size={15} fill="currentColor" />
-                                </button>
-                              )}
-                            </>
-                          ) : (
-                            <>
-                              {/* Play button */}
-                              {slide.proj.videoUrl && (
-                                <button
-                                  onClick={() => setVideoModal(slide.proj.videoUrl!)}
-                                  className="mb-4 w-14 h-14 border border-white/40 flex items-center justify-center hover:border-[#F58A2C] hover:text-[#F58A2C] transition-colors duration-200"
-                                >
-                                  <Play size={20} fill="currentColor" />
-                                </button>
-                              )}
-
-                              {/* Title — fades out after 5s */}
-                              <h2
-                                className="font-[family-name:var(--font-bebas)] leading-[0.88] tracking-[0.02em] text-white"
-                                style={{
-                                  fontSize: "clamp(2.5rem, 11vw, 8rem)",
-                                  opacity: isTitleVisible ? 1 : 0,
-                                  transition: "opacity 1s ease",
-                                }}
-                              >
-                                {slide.proj.title}
-                              </h2>
-
-                              {/* Description — fades out after 5s */}
-                              <div style={{ opacity: isTitleVisible ? 1 : 0, transition: "opacity 1s ease" }}>
-                                <p className="text-white/60 text-sm mt-2 max-w-sm truncate">
-                                  {slide.proj.description}
-                                </p>
-                              </div>
-                            </>
-                          )}
-                        </div>
                       </div>
                     );
                   })}
@@ -562,7 +582,7 @@ export default function ServiceSections() {
                   {currentSlide > 0 ? svc.projects[currentSlide - 1].title : ""}
                 </p>
 
-                {/* Dot indicators — larger for easy tapping */}
+                {/* Dot indicators */}
                 <div className="flex items-center mt-3">
                   {Array.from({ length: totalSlides }).map((_, i) => (
                     <button
@@ -591,12 +611,12 @@ export default function ServiceSections() {
                 </button>
               </div>
 
-              <div className="absolute bottom-5 left-1/2 -translate-x-1/2 flex flex-col items-center gap-1 text-white/15 select-none">
+              <div className="absolute bottom-5 left-1/2 -translate-x-1/2 flex flex-col items-center gap-1 text-white/15 select-none z-10">
                 <span className="text-[8px] tracking-[0.25em] uppercase">Scroll</span>
                 <ChevronDown size={10} className="animate-bounce" />
               </div>
 
-              <div className="absolute bottom-5 right-6 text-white/10 font-[family-name:var(--font-bebas)] text-sm tracking-widest select-none">
+              <div className="absolute bottom-5 right-6 text-white/10 font-[family-name:var(--font-bebas)] text-sm tracking-widest select-none z-10">
                 {String(svcIdx + 1).padStart(2, "0")} / {String(SERVICES.length).padStart(2, "0")}
               </div>
             </section>
