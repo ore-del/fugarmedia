@@ -177,6 +177,8 @@ export default function ServiceSections() {
   const [videoModal, setVideoModal] = useState<string | null>(null);
   const [pricingModal, setPricingModal] = useState<ServiceDef | null>(null);
   const [visible, setVisible] = useState<Set<string>>(new Set());
+  const [sectionFlash, setSectionFlash] = useState(false);
+  const [thanksVisible, setThanksVisible] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
 
   const slideMapRef = useRef<Record<string, number>>(
@@ -191,6 +193,9 @@ export default function ServiceSections() {
   const hasAutoAdvancedRef = useRef<Record<string, boolean>>(
     Object.fromEntries(SERVICES.map((s) => [s.id, false]))
   );
+  const flashTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const thanksTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const scrollingRef = useRef(false);
 
   const startTitleHideTimer = useCallback((svcId: string) => {
     if (titleHideTimerRef.current[svcId]) clearTimeout(titleHideTimerRef.current[svcId]!);
@@ -242,6 +247,57 @@ export default function ServiceSections() {
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
+  }, []);
+
+  useEffect(() => {
+    const container = scrollRef.current;
+    if (!container) return;
+    const onScroll = () => {
+      if (!scrollingRef.current) {
+        scrollingRef.current = true;
+        setSectionFlash(true);
+      }
+      if (flashTimerRef.current) clearTimeout(flashTimerRef.current);
+      flashTimerRef.current = setTimeout(() => {
+        scrollingRef.current = false;
+        setSectionFlash(false);
+      }, 400);
+    };
+    container.addEventListener("scroll", onScroll, { passive: true });
+    return () => {
+      container.removeEventListener("scroll", onScroll);
+      if (flashTimerRef.current) clearTimeout(flashTimerRef.current);
+    };
+  }, []);
+
+  useEffect(() => {
+    const container = scrollRef.current;
+    if (!container) return;
+    let touchStartY = 0;
+    const trigger = () => {
+      setThanksVisible(true);
+      if (thanksTimerRef.current) clearTimeout(thanksTimerRef.current);
+      thanksTimerRef.current = setTimeout(() => setThanksVisible(false), 3000);
+    };
+    const onWheel = (e: WheelEvent) => {
+      const atBottom = container.scrollTop + container.clientHeight >= container.scrollHeight - 10;
+      if (atBottom && e.deltaY > 0) trigger();
+    };
+    const onTouchStart = (e: TouchEvent) => { touchStartY = e.touches[0].clientY; };
+    const onTouchMove = (e: TouchEvent) => {
+      const deltaY = touchStartY - e.touches[0].clientY;
+      const atBottom = container.scrollTop + container.clientHeight >= container.scrollHeight - 10;
+      if (atBottom && deltaY > 20) trigger();
+    };
+    container.addEventListener("wheel", onWheel, { passive: true });
+    container.addEventListener("touchstart", onTouchStart, { passive: true });
+    container.addEventListener("touchmove", onTouchMove, { passive: true });
+    return () => {
+      container.removeEventListener("wheel", onWheel);
+      container.removeEventListener("touchstart", onTouchStart);
+      container.removeEventListener("touchmove", onTouchMove);
+      if (thanksTimerRef.current) clearTimeout(thanksTimerRef.current);
+    };
   }, []);
 
   const navigate = useCallback((svcId: string, dir: "prev" | "next") => {
@@ -329,7 +385,7 @@ export default function ServiceSections() {
         >
           {/* Tagline — Anton font, fills the screen width like the screenshot */}
           <p
-            className="font-[family-name:var(--font-anton)] text-[#F58A2C] text-center leading-[1.05] px-6 sm:px-10"
+            className="font-[family-name:var(--font-anton)] text-[#F58A2C] text-center leading-[1.05] px-6 sm:px-10 uppercase"
             style={{ fontSize: "clamp(2.4rem, 7.5vw, 6rem)", maxWidth: "900px" }}
           >
             Documenting the Human Experience in the Most Beautiful Way Possible
@@ -579,6 +635,29 @@ export default function ServiceSections() {
           </div>
         </div>
       )}
+
+      {/* ── Orange section-transition flash ──────────────────────────────── */}
+      <div
+        className="fixed inset-0 z-[100] pointer-events-none"
+        style={{
+          background: "#F58A2C",
+          opacity: sectionFlash ? 0.35 : 0,
+          transition: sectionFlash ? "opacity 0.08s ease" : "opacity 0.35s ease",
+        }}
+      />
+
+      {/* ── "Thanks for watching" toast ──────────────────────────────────── */}
+      <div
+        className="fixed bottom-0 left-1/2 z-[300] pointer-events-none"
+        style={{
+          transform: `translateX(-50%) translateY(${thanksVisible ? "0" : "100%"})`,
+          transition: "transform 0.45s cubic-bezier(0.16,1,0.3,1)",
+        }}
+      >
+        <div className="mb-8 bg-[#F58A2C] text-white text-sm font-semibold tracking-[0.12em] px-10 py-4 whitespace-nowrap">
+          Thanks for watching 🎉
+        </div>
+      </div>
 
       {/* ── Pricing modal ────────────────────────────────────────────────── */}
       {pricingModal && (
