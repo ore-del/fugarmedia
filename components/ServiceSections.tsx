@@ -153,33 +153,17 @@ function getThumb(videoUrl?: string): string | null {
   return id ? `https://img.youtube.com/vi/${id}/maxresdefault.jpg` : null;
 }
 
-// Nav logo dimensions — splash logo is the same element scaled up then back
-const NAV_LOGO_W = 128; // px  (w-32)
-const NAV_LOGO_H = 36;  // px  (h-9)
-const NAV_TOP    = 20;  // px  (py-5)
+// Nav logo dimensions (kept for reference)
+const NAV_LOGO_W = 128; // px (w-32)
+const NAV_LOGO_H = 36;  // px (h-9)
 
 export default function ServiceSections() {
   // ── Splash animation state ──────────────────────────────────────────────
-  // 'visible'  → logo fills screen
-  // 'animating'→ logo shrinks back to nav, overlay fades
-  // 'hidden'   → splash done, normal nav visible
   const [splashPhase, setSplashPhase] = useState<"visible" | "animating" | "hidden">("visible");
 
-  // Scale + Y-offset to transform nav-sized logo → fills viewport
-  const [splashScale, setSplashScale] = useState(10);
-  const [splashDy, setSplashDy] = useState(350);
-
   useEffect(() => {
-    const w = window.innerWidth;
-    const h = window.innerHeight;
-    const scale = Math.min(w / NAV_LOGO_W, h / NAV_LOGO_H) * 0.9;
-    const navLogoCenterY = NAV_TOP + NAV_LOGO_H / 2;
-    const dy = h / 2 - navLogoCenterY;
-    setSplashScale(scale);
-    setSplashDy(dy);
-
-    const t1 = setTimeout(() => setSplashPhase("animating"), 1800);
-    const t2 = setTimeout(() => setSplashPhase("hidden"), 3000);
+    const t1 = setTimeout(() => setSplashPhase("animating"), 2000);
+    const t2 = setTimeout(() => setSplashPhase("hidden"), 3300);
     return () => { clearTimeout(t1); clearTimeout(t2); };
   }, []);
 
@@ -289,38 +273,26 @@ export default function ServiceSections() {
 
   return (
     <>
-      {/* ── Splash: dark overlay ─────────────────────────────────────────── */}
+      {/* ── Splash screen — high-res logo fades out ──────────────────────── */}
       {splashPhase !== "hidden" && (
         <div
-          className="fixed inset-0 z-[500] bg-black pointer-events-none"
+          className="fixed inset-0 z-[500] bg-black flex items-center justify-center pointer-events-none"
           style={{
-            opacity: splashPhase === "visible" ? 1 : 0,
-            transition: splashPhase === "animating" ? "opacity 0.9s ease 0.1s" : "none",
-          }}
-        />
-      )}
-
-      {/* ── Splash logo — same image/size as nav logo, scaled up to fill screen ── */}
-      {splashPhase !== "hidden" && (
-        <div
-          className="fixed z-[501] pointer-events-none"
-          style={{
-            top: `${NAV_TOP}px`,
-            left: "50%",
-            width: `${NAV_LOGO_W}px`,
-            height: `${NAV_LOGO_H}px`,
-            transformOrigin: "center center",
-            transform: splashPhase === "visible"
-              ? `translateX(-50%) translateY(${splashDy}px) scale(${splashScale})`
-              : "translateX(-50%) translateY(0px) scale(1)",
             opacity: splashPhase === "animating" ? 0 : 1,
-            transition: splashPhase === "animating"
-              ? "transform 1.1s cubic-bezier(0.16,1,0.3,1), opacity 0.7s ease 0.4s"
-              : "none",
+            transition: splashPhase === "animating" ? "opacity 1.2s ease" : "none",
           }}
         >
-          <div style={{ position: "relative", width: NAV_LOGO_W, height: NAV_LOGO_H }}>
-            <Image src="/logo2.png" alt="FUGAR" fill className="object-contain" priority />
+          <div
+            className="relative"
+            style={{ width: "min(90vw, 80vh)", height: "min(90vw, 80vh)" }}
+          >
+            <Image
+              src="/logo-hires.png"
+              alt="FUGAR"
+              fill
+              className="object-contain"
+              priority
+            />
           </div>
         </div>
       )}
@@ -449,19 +421,24 @@ export default function ServiceSections() {
                           </>
                         ) : (
                           <>
-                            {/* Fades out after 5s to reveal background video */}
+                            {/* Title — fades out after 5s (minimized title appears above dots) */}
+                            <h2
+                              className="font-[family-name:var(--font-bebas)] leading-[0.88] tracking-[0.02em] text-white"
+                              style={{
+                                fontSize: "clamp(2.5rem, 11vw, 8rem)",
+                                opacity: isTitleVisible ? 1 : 0,
+                                transition: "opacity 1s ease",
+                              }}
+                            >
+                              {slide.proj.title}
+                            </h2>
+                            {/* Description — fades out after 5s, stays hidden */}
                             <div
                               style={{
                                 opacity: isTitleVisible ? 1 : 0,
                                 transition: "opacity 1s ease",
                               }}
                             >
-                              <h2
-                                className="font-[family-name:var(--font-bebas)] leading-[0.88] tracking-[0.02em] text-white"
-                                style={{ fontSize: "clamp(2.5rem, 11vw, 8rem)" }}
-                              >
-                                {slide.proj.title}
-                              </h2>
                               <p className="text-white/50 text-sm mt-3 max-w-sm truncate">
                                 {slide.proj.description}
                               </p>
@@ -491,20 +468,37 @@ export default function ServiceSections() {
                   })}
                 </div>
 
-                {/* Dot indicators */}
-                <div className="flex items-center gap-[6px] mt-4">
+                {/* Minimized project title — fades in above dots after 5s on a project slide */}
+                <p
+                  className="text-white/55 text-[11px] font-semibold tracking-[0.18em] uppercase"
+                  style={{
+                    opacity: currentSlide > 0 && !isTitleVisible ? 1 : 0,
+                    transition: "opacity 1s ease",
+                    minHeight: "16px",
+                    marginTop: "16px",
+                  }}
+                >
+                  {currentSlide > 0 ? svc.projects[currentSlide - 1].title : ""}
+                </p>
+
+                {/* Dot indicators — larger for easy tapping */}
+                <div className="flex items-center mt-3">
                   {Array.from({ length: totalSlides }).map((_, i) => (
                     <button
                       key={i}
                       onClick={() => goToSlide(svc.id, i)}
                       aria-label={`Slide ${i + 1}`}
-                      className="rounded-full transition-all duration-300"
-                      style={{
-                        width: i === currentSlide ? "14px" : "3px",
-                        height: "2px",
-                        background: i === currentSlide ? "#ffffff" : "rgba(255,255,255,0.2)",
-                      }}
-                    />
+                      className="p-3"
+                    >
+                      <div
+                        className="rounded-full transition-all duration-300"
+                        style={{
+                          width: i === currentSlide ? "22px" : "5px",
+                          height: "4px",
+                          background: i === currentSlide ? "#ffffff" : "rgba(255,255,255,0.25)",
+                        }}
+                      />
+                    </button>
                   ))}
                 </div>
 
