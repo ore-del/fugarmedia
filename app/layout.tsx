@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Montserrat, Bebas_Neue } from "next/font/google";
+import { Montserrat, Bebas_Neue, Anton } from "next/font/google";
 import "./globals.css";
 
 const montserrat = Montserrat({
@@ -12,6 +12,13 @@ const montserrat = Montserrat({
 const bebasNeue = Bebas_Neue({
   subsets: ["latin"],
   variable: "--font-bebas",
+  weight: "400",
+  display: "swap",
+});
+
+const anton = Anton({
+  subsets: ["latin"],
+  variable: "--font-anton",
   weight: "400",
   display: "swap",
 });
@@ -33,8 +40,14 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html
       lang="en"
-      className={`${montserrat.variable} ${bebasNeue.variable}`}
+      className={`${montserrat.variable} ${bebasNeue.variable} ${anton.variable}`}
     >
+      <head>
+        <link
+          rel="stylesheet"
+          href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&icon_names=play_arrow"
+        />
+      </head>
       <body className="font-[family-name:var(--font-montserrat)] min-h-screen flex flex-col">
         {children}
       </body>

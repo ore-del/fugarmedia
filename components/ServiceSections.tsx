@@ -3,20 +3,33 @@
 import { useState, useEffect, useCallback, useRef } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { ChevronLeft, ChevronRight, Play, X, ChevronDown, ArrowRight } from "lucide-react";
+import { X, ChevronDown, ArrowRight } from "lucide-react";
 
 type Project = {
   title: string;
+  description: string;
   client: string;
   year: string;
   videoUrl?: string;
+  image?: string;
+};
+
+type PricingPackage = {
+  name: string;
+  price: string;
+  includes: string[];
+  note?: string;
 };
 
 type ServiceDef = {
   id: string;
   heading: string[];
   price: string;
+  description: string;
+  packages: PricingPackage[];
   projects: Project[];
+  sectionVideo?: string;
+  sectionImage?: string;
 };
 
 const SERVICES: ServiceDef[] = [
@@ -24,37 +37,112 @@ const SERVICES: ServiceDef[] = [
     id: "music-videos",
     heading: ["MUSIC VIDEOS"],
     price: "Starting at $2,000",
+    description: "Full-scale music video production from concept to final delivery.",
+    sectionVideo: "https://youtu.be/KWoTyfPsqbE",
+    packages: [
+      {
+        name: "Essential",
+        price: "$2,000",
+        includes: [
+          "Pre-production planning",
+          "Full day shoot (up to 10 hrs)",
+          "Professional editing & color grade",
+          "1 final deliverable",
+          "2 revision rounds",
+        ],
+      },
+      {
+        name: "Premium",
+        price: "$3,500+",
+        includes: [
+          "Everything in Essential",
+          "Multiple locations",
+          "Behind the scenes package",
+          "Teaser / trailer cut",
+          "Unlimited revisions",
+        ],
+        note: "Most Popular",
+      },
+    ],
     projects: [
-      { title: "Add your project title", client: "Artist / Label", year: "2024" },
-      { title: "Add your project title", client: "Artist / Label", year: "2024" },
-      { title: "Add your project title", client: "Artist / Label", year: "2023" },
+      { title: "Music Video 1", description: "High-energy visual featuring artist performance across multiple locations.", client: "Artist / Label", year: "2024", videoUrl: "https://youtu.be/WqTO4uk1siU" },
+      { title: "Music Video 2", description: "Cinematic narrative piece with choreographed sequences and dynamic lighting.", client: "Artist / Label", year: "2024", videoUrl: "https://youtu.be/N5dOy9FGtDg" },
+      { title: "Music Video 3", description: "Concept-driven production blending performance with abstract visual elements.", client: "Artist / Label", year: "2023", videoUrl: "https://youtu.be/FCUk7rIBBAE" },
     ],
   },
   {
     id: "reels-content",
     heading: ["REELS &", "CONTENT"],
     price: "$800",
+    description: "High-impact short-form content optimized for social platforms.",
+    sectionVideo: "https://www.youtube.com/shorts/UbJLWJTDEis",
+    packages: [
+      {
+        name: "Content Pack",
+        price: "$800",
+        includes: [
+          "Content strategy session",
+          "4-hour shoot",
+          "5 edited reels / TikToks",
+          "Platform-optimized delivery",
+          "Licensed music",
+        ],
+      },
+    ],
     projects: [
-      { title: "Add your project title", client: "Creator / Brand", year: "2024" },
-      { title: "Add your project title", client: "Creator / Brand", year: "2024" },
+      { title: "Reel 1", description: "Fast-paced social content optimized for Instagram Reels and TikTok.", client: "Creator / Brand", year: "2024", videoUrl: "https://www.youtube.com/shorts/H5FKcoQzwvA" },
+      { title: "Reel 2", description: "Behind-the-scenes brand content capturing authentic moments and highlights.", client: "Creator / Brand", year: "2024", videoUrl: "https://www.youtube.com/shorts/TWwbAe-HRWA" },
+      { title: "Reel 3", description: "Lifestyle reel series featuring the artist in dynamic urban environments.", client: "Creator / Brand", year: "2024", videoUrl: "https://www.youtube.com/shorts/ijXfsL9Aqas" },
     ],
   },
   {
     id: "live-dj-sessions",
     heading: ["LIVE DJ", "SESSIONS"],
     price: "$600",
+    description: "Professional multi-camera capture of live DJ performances.",
+    sectionVideo: "https://youtu.be/mzu5kHKFkqs",
+    packages: [
+      {
+        name: "Session",
+        price: "$600",
+        includes: [
+          "Multi-camera setup",
+          "Live audio recording",
+          "Professional mix & edit",
+          "Full session video",
+          "Highlight reel",
+        ],
+      },
+    ],
     projects: [
-      { title: "Add your project title", client: "DJ Name", year: "2024" },
-      { title: "Add your project title", client: "DJ Name", year: "2024" },
+      { title: "DJ Set 1", description: "Multi-camera live session at an intimate venue with professional audio mix.", client: "DJ Name", year: "2024", videoUrl: "https://youtu.be/dHU8B76kR_s" },
+      { title: "DJ Set 2", description: "High-energy rooftop performance captured with cinematic drone and ground angles.", client: "DJ Name", year: "2024", videoUrl: "https://youtu.be/A_GJkmn8B4I" },
+      { title: "DJ Set 3", description: "Studio livestream session featuring guest appearances and exclusive transitions.", client: "DJ Name", year: "2024", videoUrl: "https://youtu.be/pRnr9hRooAM" },
     ],
   },
   {
     id: "editorials-photoshoots",
     heading: ["EDITORIALS &", "PHOTOSHOOTS"],
     price: "$600",
+    description: "Editorial and artistic photography for artists and brands.",
+    sectionImage: "/editorials/editorial-intro.jpg",
+    packages: [
+      {
+        name: "Shoot",
+        price: "$600",
+        includes: [
+          "Concept & mood board planning",
+          "Half-day shoot (up to 5 hrs)",
+          "20+ fully edited photos",
+          "Multiple looks / outfits",
+          "Commercial usage rights",
+        ],
+      },
+    ],
     projects: [
-      { title: "Add your project title", client: "Brand / Artist", year: "2024" },
-      { title: "Add your project title", client: "Brand / Artist", year: "2024" },
+      { title: "Editorial 1", description: "Fashion editorial exploring texture and contrast through bold wardrobe choices.", client: "Brand / Artist", year: "2024", image: "/editorials/editorial-1.jpg" },
+      { title: "Editorial 2", description: "Artist portrait series with environmental storytelling and natural lighting.", client: "Brand / Artist", year: "2024", image: "/editorials/editorial-2.jpg" },
+      { title: "Editorial 3", description: "Brand campaign shoot delivering commercial-grade imagery for digital and print.", client: "Brand / Artist", year: "2024", image: "/editorials/editorial-3.jpg" },
     ],
   },
 ];
@@ -72,18 +160,59 @@ function getThumb(videoUrl?: string): string | null {
   return id ? `https://img.youtube.com/vi/${id}/maxresdefault.jpg` : null;
 }
 
+// Nav logo dimensions (kept for reference)
+const NAV_LOGO_W = 128; // px (w-32)
+const NAV_LOGO_H = 36;  // px (h-9)
+
 export default function ServiceSections() {
-  const [projIdx, setProjIdx] = useState<Record<string, number>>(
+  // ── Splash animation state ──────────────────────────────────────────────
+  const [splashPhase, setSplashPhase] = useState<"visible" | "animating" | "hidden">("visible");
+
+  useEffect(() => {
+    const t1 = setTimeout(() => setSplashPhase("animating"), 2000);
+    const t2 = setTimeout(() => setSplashPhase("hidden"), 3300);
+    return () => { clearTimeout(t1); clearTimeout(t2); };
+  }, []);
+
+  // ── Carousel state ──────────────────────────────────────────────────────
+  const [slideMap, setSlideMap] = useState<Record<string, number>>(
     Object.fromEntries(SERVICES.map((s) => [s.id, 0]))
   );
-  const [fading, setFading] = useState<Record<string, boolean>>(
-    Object.fromEntries(SERVICES.map((s) => [s.id, false]))
+  const [titleVisible, setTitleVisible] = useState<Record<string, boolean>>(
+    Object.fromEntries(SERVICES.map((s) => [s.id, true]))
   );
-  const [modal, setModal] = useState<string | null>(null);
+  const [videoModal, setVideoModal] = useState<string | null>(null);
+  const [pricingModal, setPricingModal] = useState<ServiceDef | null>(null);
   const [visible, setVisible] = useState<Set<string>>(new Set());
+  const [sectionFlash, setSectionFlash] = useState(false);
+  const [thanksVisible, setThanksVisible] = useState(false);
+  const [sectionInView, setSectionInView] = useState<Set<string>>(new Set());
   const scrollRef = useRef<HTMLDivElement>(null);
 
-  // Intersection observer — triggers entrance animation per section
+  const slideMapRef = useRef<Record<string, number>>(
+    Object.fromEntries(SERVICES.map((s) => [s.id, 0]))
+  );
+  const autoAdvanceTimerRef = useRef<Record<string, ReturnType<typeof setTimeout> | null>>(
+    Object.fromEntries(SERVICES.map((s) => [s.id, null]))
+  );
+  const titleHideTimerRef = useRef<Record<string, ReturnType<typeof setTimeout> | null>>(
+    Object.fromEntries(SERVICES.map((s) => [s.id, null]))
+  );
+  const hasAutoAdvancedRef = useRef<Record<string, boolean>>(
+    Object.fromEntries(SERVICES.map((s) => [s.id, false]))
+  );
+  const flashTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const thanksTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const scrollingRef = useRef(false);
+
+  const startTitleHideTimer = useCallback((svcId: string) => {
+    if (titleHideTimerRef.current[svcId]) clearTimeout(titleHideTimerRef.current[svcId]!);
+    setTitleVisible((prev) => ({ ...prev, [svcId]: true }));
+    titleHideTimerRef.current[svcId] = setTimeout(() => {
+      setTitleVisible((prev) => ({ ...prev, [svcId]: false }));
+    }, 5000);
+  }, []);
+
   useEffect(() => {
     const observers: IntersectionObserver[] = [];
     SERVICES.forEach((svc) => {
@@ -91,8 +220,24 @@ export default function ServiceSections() {
       if (!el) return;
       const obs = new IntersectionObserver(
         ([entry]) => {
-          if (entry.isIntersecting)
+          if (entry.isIntersecting) {
             setVisible((prev) => new Set([...prev, svc.id]));
+            setSectionInView((prev) => new Set([...prev, svc.id]));
+            if (!hasAutoAdvancedRef.current[svc.id]) {
+              hasAutoAdvancedRef.current[svc.id] = true;
+              autoAdvanceTimerRef.current[svc.id] = setTimeout(() => {
+                slideMapRef.current = { ...slideMapRef.current, [svc.id]: 1 };
+                setSlideMap((prev) => ({ ...prev, [svc.id]: 1 }));
+                startTitleHideTimer(svc.id);
+              }, 5000);
+            }
+          } else {
+            setSectionInView((prev) => {
+              const next = new Set(prev);
+              next.delete(svc.id);
+              return next;
+            });
+          }
         },
         { threshold: 0.45, root: scrollRef.current }
       );
@@ -100,70 +245,206 @@ export default function ServiceSections() {
       observers.push(obs);
     });
     return () => observers.forEach((o) => o.disconnect());
+  }, [startTitleHideTimer]);
+
+  useEffect(() => {
+    const autoRefs = autoAdvanceTimerRef.current;
+    const titleRefs = titleHideTimerRef.current;
+    return () => {
+      Object.values(autoRefs).forEach((t) => { if (t) clearTimeout(t); });
+      Object.values(titleRefs).forEach((t) => { if (t) clearTimeout(t); });
+    };
   }, []);
 
-  // Close modal on Escape
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") setModal(null);
+      if (e.key === "Escape") { setVideoModal(null); setPricingModal(null); }
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
   }, []);
 
-  const navigate = useCallback(
-    (svcId: string, dir: "prev" | "next") => {
-      if (fading[svcId]) return;
-      const svc = SERVICES.find((s) => s.id === svcId)!;
-      setFading((f) => ({ ...f, [svcId]: true }));
-      setTimeout(() => {
-        setProjIdx((p) => {
-          const next =
-            dir === "next"
-              ? (p[svcId] + 1) % svc.projects.length
-              : (p[svcId] - 1 + svc.projects.length) % svc.projects.length;
-          return { ...p, [svcId]: next };
-        });
-        setFading((f) => ({ ...f, [svcId]: false }));
-      }, 200);
-    },
-    [fading]
-  );
+  useEffect(() => {
+    const container = scrollRef.current;
+    if (!container) return;
+    const onScroll = () => {
+      if (!scrollingRef.current) {
+        scrollingRef.current = true;
+        setSectionFlash(true);
+      }
+      if (flashTimerRef.current) clearTimeout(flashTimerRef.current);
+      flashTimerRef.current = setTimeout(() => {
+        scrollingRef.current = false;
+        setSectionFlash(false);
+      }, 400);
+    };
+    container.addEventListener("scroll", onScroll, { passive: true });
+    return () => {
+      container.removeEventListener("scroll", onScroll);
+      if (flashTimerRef.current) clearTimeout(flashTimerRef.current);
+    };
+  }, []);
+
+  useEffect(() => {
+    const container = scrollRef.current;
+    if (!container) return;
+    let touchStartY = 0;
+    const trigger = () => {
+      setThanksVisible(true);
+      if (thanksTimerRef.current) clearTimeout(thanksTimerRef.current);
+      thanksTimerRef.current = setTimeout(() => setThanksVisible(false), 3000);
+    };
+    const onWheel = (e: WheelEvent) => {
+      const atBottom = container.scrollTop + container.clientHeight >= container.scrollHeight - 10;
+      if (atBottom && e.deltaY > 0) trigger();
+    };
+    const onTouchStart = (e: TouchEvent) => { touchStartY = e.touches[0].clientY; };
+    const onTouchMove = (e: TouchEvent) => {
+      const deltaY = touchStartY - e.touches[0].clientY;
+      const atBottom = container.scrollTop + container.clientHeight >= container.scrollHeight - 10;
+      if (atBottom && deltaY > 20) trigger();
+    };
+    container.addEventListener("wheel", onWheel, { passive: true });
+    container.addEventListener("touchstart", onTouchStart, { passive: true });
+    container.addEventListener("touchmove", onTouchMove, { passive: true });
+    return () => {
+      container.removeEventListener("wheel", onWheel);
+      container.removeEventListener("touchstart", onTouchStart);
+      container.removeEventListener("touchmove", onTouchMove);
+      if (thanksTimerRef.current) clearTimeout(thanksTimerRef.current);
+    };
+  }, []);
+
+  const navigate = useCallback((svcId: string, dir: "prev" | "next") => {
+    const totalSlides = SERVICES.find((s) => s.id === svcId)!.projects.length + 1;
+    const current = slideMapRef.current[svcId];
+    const next = dir === "next"
+      ? (current + 1) % totalSlides
+      : (current - 1 + totalSlides) % totalSlides;
+    slideMapRef.current = { ...slideMapRef.current, [svcId]: next };
+    setSlideMap((prev) => ({ ...prev, [svcId]: next }));
+    if (next === 0) {
+      if (titleHideTimerRef.current[svcId]) clearTimeout(titleHideTimerRef.current[svcId]!);
+      setTitleVisible((prev) => ({ ...prev, [svcId]: true }));
+    } else {
+      startTitleHideTimer(svcId);
+    }
+  }, [startTitleHideTimer]);
+
+  const goToSlide = useCallback((svcId: string, idx: number) => {
+    slideMapRef.current = { ...slideMapRef.current, [svcId]: idx };
+    setSlideMap((prev) => ({ ...prev, [svcId]: idx }));
+    if (idx === 0) {
+      if (titleHideTimerRef.current[svcId]) clearTimeout(titleHideTimerRef.current[svcId]!);
+      setTitleVisible((prev) => ({ ...prev, [svcId]: true }));
+    } else {
+      startTitleHideTimer(svcId);
+    }
+  }, [startTitleHideTimer]);
 
   return (
     <>
-      {/* ── Fixed navigation ── */}
-      <nav className="fixed top-0 left-0 right-0 z-50 flex items-center justify-between px-6 sm:px-10 py-5 pointer-events-none">
-        <div className="pointer-events-auto relative h-9 w-32">
+      {/* ── Splash screen — high-res logo fades out ──────────────────────── */}
+      {splashPhase !== "hidden" && (
+        <div
+          className="fixed inset-0 z-[500] bg-black flex items-center justify-center pointer-events-none"
+          style={{
+            opacity: splashPhase === "animating" ? 0 : 1,
+            transition: splashPhase === "animating" ? "opacity 1.2s ease" : "none",
+          }}
+        >
+          <div
+            className="relative"
+            style={{ width: "min(90vw, 80vh)", height: "min(90vw, 80vh)" }}
+          >
+            <Image
+              src="/logo-hires.png"
+              alt="FUGAR"
+              fill
+              className="object-contain"
+              priority
+            />
+          </div>
+        </div>
+      )}
+
+      {/* ── Fixed navigation ─────────────────────────────────────────────── */}
+      <nav
+        className="fixed top-0 left-0 right-0 z-50 flex items-center justify-center py-5 pointer-events-none"
+        style={{
+          opacity: splashPhase === "hidden" ? 1 : 0,
+          transition: splashPhase === "hidden" ? "opacity 0.4s ease" : "none",
+        }}
+      >
+        <Link href="/" className="pointer-events-auto relative h-9 w-32">
           <Image
             src="/logo2.png"
             alt="Fugar Media"
             fill
-            className="object-contain object-left"
+            className="object-contain"
             priority
           />
-        </div>
-        <Link
-          href="/booking"
-          className="pointer-events-auto text-[#FF6200] text-[9px] sm:text-[10px] font-bold tracking-[0.28em] uppercase hover:opacity-60 transition-opacity duration-150"
-        >
-          Book a Consultation
         </Link>
       </nav>
 
-      {/* ── Scroll-snap container ── */}
+      {/* ── Scroll-snap container ────────────────────────────────────────── */}
       <div
         ref={scrollRef}
         className="snap-y snap-mandatory overflow-y-scroll"
         style={{ height: "100dvh" }}
       >
+        {/* ── Hero section ──────────────────────────────────────────────── */}
+        <section
+          className="relative snap-start snap-always bg-black flex flex-col items-center justify-center overflow-hidden"
+          style={{ height: "100dvh" }}
+        >
+          {/* YouTube background */}
+          <div className="absolute inset-0 pointer-events-none overflow-hidden">
+            <iframe
+              src="https://www.youtube.com/embed/Pra0PHgaIFI?autoplay=1&mute=1&loop=1&playlist=Pra0PHgaIFI&controls=0&showinfo=0&rel=0&modestbranding=1&playsinline=1"
+              className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2"
+              style={{ width: "177.78vh", height: "100vh", minWidth: "100%", minHeight: "56.25vw" }}
+              allow="autoplay"
+              title="Hero background video"
+            />
+          </div>
+
+          {/* Tagline */}
+          <p
+            className="relative font-[family-name:var(--font-anton)] text-[#F58A2C] text-center leading-[1.05] px-6 sm:px-10 uppercase"
+            style={{ fontSize: "clamp(2.4rem, 7.5vw, 6rem)", maxWidth: "900px", textShadow: "0 2px 24px rgba(0,0,0,0.9)" }}
+          >
+            Documenting the Human Experience in the Most Beautiful Way Possible
+          </p>
+
+          {/* Scroll indicator */}
+          <div className="absolute bottom-5 left-1/2 -translate-x-1/2 flex flex-col items-center gap-1 text-white/15 select-none">
+            <span className="text-[8px] tracking-[0.25em] uppercase">Scroll</span>
+            <ChevronDown size={10} className="animate-bounce" />
+          </div>
+        </section>
+
+        {/* ── Service sections ──────────────────────────────────────────── */}
         {SERVICES.map((svc, svcIdx) => {
-          const pi = projIdx[svc.id];
-          const proj = svc.projects[pi];
-          const thumb = getThumb(proj.videoUrl);
+          const currentSlide = slideMap[svc.id];
           const isVis = visible.has(svc.id);
-          const isFading = fading[svc.id];
-          const isLast = svcIdx === SERVICES.length - 1;
+          const isInView = sectionInView.has(svc.id);
+          const isTitleVisible = titleVisible[svc.id];
+          const totalSlides = svc.projects.length + 1;
+
+          const slides = [
+            { isIntro: true as const },
+            ...svc.projects.map((p) => ({ isIntro: false as const, proj: p })),
+          ];
+
+          // Compute active background source
+          const activeBgVideo = currentSlide === 0
+            ? (svc.sectionVideo ?? null)
+            : (svc.projects[currentSlide - 1]?.videoUrl ?? null);
+          const activeBgImage = currentSlide === 0
+            ? (svc.sectionImage ?? null)
+            : (svc.projects[currentSlide - 1]?.image ?? null);
+          const activeBgVideoId = activeBgVideo ? getYouTubeId(activeBgVideo) : null;
 
           return (
             <section
@@ -172,261 +453,326 @@ export default function ServiceSections() {
               className="relative snap-start snap-always bg-black flex flex-col items-center justify-center overflow-hidden"
               style={{ height: "100dvh" }}
             >
-              {/* Entrance animation wrapper */}
+              {/* ── Full-section background — video (autoplay muted) or image ── */}
+              {isInView && activeBgVideoId && (
+                <div className="absolute inset-0 pointer-events-none overflow-hidden">
+                  <iframe
+                    key={activeBgVideoId}
+                    src={`https://www.youtube.com/embed/${activeBgVideoId}?autoplay=1&mute=1&loop=1&playlist=${activeBgVideoId}&controls=0&showinfo=0&rel=0&modestbranding=1&playsinline=1`}
+                    className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2"
+                    style={{ width: "177.78vh", height: "100vh", minWidth: "100%", minHeight: "56.25vw" }}
+                    allow="autoplay"
+                    title="Background video"
+                  />
+                </div>
+              )}
+              {isInView && !activeBgVideoId && activeBgImage && (
+                <div className="absolute inset-0 pointer-events-none">
+                  <Image src={activeBgImage} alt="" fill className="object-cover" />
+                </div>
+              )}
+
+              <button
+                onClick={() => navigate(svc.id, "prev")}
+                aria-label="Previous"
+                className="absolute left-3 sm:left-6 top-1/2 -translate-y-1/2 z-10 p-1 opacity-70 hover:opacity-100 transition-opacity duration-200"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" height="36px" viewBox="0 -960 960 960" width="36px" fill="#F58A2C">
+                  <path d="m406-481 177 177q9 9 8.5 21t-9.5 21q-9 9-21.5 9t-21.5-9L341-460q-5-5-7-10t-2-11q0-6 2-11t7-10l199-199q9-9 21.5-9t21.5 9q9 9 9 21.5t-9 21.5L406-481Z"/>
+                </svg>
+              </button>
+
+              <button
+                onClick={() => navigate(svc.id, "next")}
+                aria-label="Next"
+                className="absolute right-3 sm:right-6 top-1/2 -translate-y-1/2 z-10 p-1 opacity-70 hover:opacity-100 transition-opacity duration-200"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" height="36px" viewBox="0 -960 960 960" width="36px" fill="#F58A2C">
+                  <path d="M530-481 353-658q-9-9-8.5-21t9.5-21q9-9 21.5-9t21.5 9l198 198q5 5 7 10t2 11q0 6-2 11t-7 10L396-261q-9 9-21 8.5t-21-9.5q-9-9-9-21.5t9-21.5l176-176Z"/>
+                </svg>
+              </button>
+
+              {/* Entrance wrapper */}
               <div
-                className="w-full flex flex-col items-center justify-center px-4 sm:px-8"
+                className="relative flex flex-col items-center w-full"
                 style={{
                   transition: "opacity 0.75s cubic-bezier(0.16,1,0.3,1), transform 0.75s cubic-bezier(0.16,1,0.3,1)",
                   opacity: isVis ? 1 : 0,
                   transform: isVis ? "translateY(0)" : "translateY(28px)",
                 }}
               >
-                {/* ── Video card + chevrons ── */}
-                <div className="relative w-full" style={{ maxWidth: "min(720px, 90vw)" }}>
-                  {/* Left chevron */}
-                  {svc.projects.length > 1 && (
-                    <button
-                      onClick={() => navigate(svc.id, "prev")}
-                      aria-label="Previous project"
-                      className="absolute -left-10 sm:-left-14 top-1/2 -translate-y-1/2 z-10 p-3 text-white/40 hover:text-white transition-colors duration-150"
-                    >
-                      <ChevronLeft size={26} strokeWidth={1.2} />
-                    </button>
-                  )}
-
-                  {/* Right chevron */}
-                  {svc.projects.length > 1 && (
-                    <button
-                      onClick={() => navigate(svc.id, "next")}
-                      aria-label="Next project"
-                      className="absolute -right-10 sm:-right-14 top-1/2 -translate-y-1/2 z-10 p-3 text-white/40 hover:text-white transition-colors duration-150"
-                    >
-                      <ChevronRight size={26} strokeWidth={1.2} />
-                    </button>
-                  )}
-
-                  {/* 16:9 Preview */}
-                  <div
-                    className="relative aspect-video bg-[#111] overflow-hidden group cursor-pointer"
-                    style={{
-                      transition: "opacity 0.2s ease",
-                      opacity: isFading ? 0 : 1,
-                    }}
-                    onClick={() => proj.videoUrl && setModal(proj.videoUrl)}
-                  >
-                    {/* Thumbnail */}
-                    {thumb ? (
-                      <Image
-                        src={thumb}
-                        alt={proj.title}
-                        fill
-                        className="object-cover transition-transform duration-700 group-hover:scale-105"
-                      />
-                    ) : (
-                      <div className="absolute inset-0 skeleton" />
-                    )}
-
-                    {/* Orange line top */}
-                    <div className="absolute top-0 left-0 right-0 h-px bg-[#FF6200]/40" />
-
-                    {/* Play button (only when video available) */}
-                    {proj.videoUrl && (
-                      <div className="absolute inset-0 flex items-center justify-center bg-black/25 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
-                        <div className="w-16 h-16 border border-white/50 flex items-center justify-center group-hover:border-[#FF6200] group-hover:text-[#FF6200] transition-all duration-200 backdrop-blur-sm">
-                          <Play size={22} fill="currentColor" />
-                        </div>
-                      </div>
-                    )}
-
-                    {/* "Coming soon" placeholder label */}
-                    {!proj.videoUrl && (
-                      <div className="absolute inset-0 flex items-center justify-center">
-                        <span className="text-white/15 text-[10px] font-bold tracking-[0.3em] uppercase">
-                          Portfolio coming soon
-                        </span>
-                      </div>
-                    )}
-
-                    {/* Project info overlay */}
-                    <div className="absolute bottom-0 left-0 right-0 px-4 py-3 bg-gradient-to-t from-black/70 via-black/20 to-transparent">
-                      <p
-                        className="text-white/80 text-xs font-medium tracking-wide truncate"
+                {/* Slide content — horizontal animation, no background (bg is section-level) */}
+                <div
+                  className="relative overflow-hidden w-full"
+                  style={{ height: "min(280px, 40vh)" }}
+                >
+                  {slides.map((slide, i) => {
+                    const delta = i - currentSlide;
+                    return (
+                      <div
+                        key={i}
+                        className="absolute inset-0 flex flex-col items-center justify-center text-center px-8"
                         style={{
-                          transition: "opacity 0.2s ease",
-                          opacity: isFading ? 0 : 1,
+                          transform: `translateX(${delta * 110}%)`,
+                          opacity: delta === 0 ? 1 : 0,
+                          transition: "transform 0.55s cubic-bezier(0.16,1,0.3,1), opacity 0.35s ease",
+                          pointerEvents: delta === 0 ? "auto" : "none",
                         }}
                       >
-                        {proj.title}
-                        {proj.client !== "—" && (
-                          <span className="text-white/35 ml-2">— {proj.client}</span>
+                        {slide.isIntro ? (
+                          <>
+                            {svc.heading.map((line, li) => (
+                              <h2
+                                key={li}
+                                className="font-[family-name:var(--font-bebas)] leading-[0.88] tracking-[0.02em] text-white"
+                                style={{ fontSize: "clamp(2.5rem, 11vw, 8rem)", textShadow: "0 2px 20px rgba(0,0,0,0.85)" }}
+                              >
+                                {line}
+                              </h2>
+                            ))}
+                            <p className="text-white text-xs tracking-[0.2em] uppercase font-light mt-3" style={{ textShadow: "0 1px 8px rgba(0,0,0,0.9)" }}>
+                              {svc.price}
+                            </p>
+                          </>
+                        ) : (
+                          <>
+                            {/* Play button — opens modal with audio */}
+                            {slide.proj.videoUrl && (
+                              <button
+                                onClick={() => setVideoModal(slide.proj.videoUrl!)}
+                                className="mb-4 w-14 h-14 border border-white/40 flex items-center justify-center text-white hover:border-[#F58A2C] hover:text-[#F58A2C] transition-colors duration-200"
+                              >
+                                <svg xmlns="http://www.w3.org/2000/svg" height="28px" viewBox="0 -960 960 960" width="28px" fill="currentColor">
+                                  <path d="M320-200v-560l440 280-440 280Z"/>
+                                </svg>
+                              </button>
+                            )}
+
+                            {/* Title — fades out after 5s */}
+                            <h2
+                              className="font-[family-name:var(--font-bebas)] leading-[0.88] tracking-[0.02em] text-white"
+                              style={{
+                                fontSize: "clamp(2.5rem, 11vw, 8rem)",
+                                opacity: isTitleVisible ? 1 : 0,
+                                transition: "opacity 1s ease",
+                                textShadow: "0 2px 20px rgba(0,0,0,0.85)",
+                              }}
+                            >
+                              {slide.proj.title}
+                            </h2>
+
+                            {/* Description — fades out after 5s */}
+                            <div style={{ opacity: isTitleVisible ? 1 : 0, transition: "opacity 1s ease" }}>
+                              <p className="text-white/80 text-sm mt-2 max-w-sm truncate" style={{ textShadow: "0 1px 8px rgba(0,0,0,0.9)" }}>
+                                {slide.proj.description}
+                              </p>
+                            </div>
+                          </>
                         )}
-                      </p>
-                      <p className="text-white/25 text-[10px] tracking-widest mt-0.5">
-                        {proj.year}
-                      </p>
-                    </div>
-                  </div>
-
-                  {/* Dot nav */}
-                  {svc.projects.length > 1 && (
-                    <div className="flex items-center justify-center gap-[6px] mt-3">
-                      {svc.projects.map((_, i) => (
-                        <button
-                          key={i}
-                          onClick={() =>
-                            setProjIdx((p) => ({ ...p, [svc.id]: i }))
-                          }
-                          aria-label={`Project ${i + 1}`}
-                          className="rounded-full transition-all duration-300"
-                          style={{
-                            width: i === pi ? "14px" : "3px",
-                            height: "2px",
-                            background: i === pi ? "#ffffff" : "rgba(255,255,255,0.2)",
-                          }}
-                        />
-                      ))}
-                    </div>
-                  )}
+                      </div>
+                    );
+                  })}
                 </div>
 
-                {/* ── Service label row ── */}
-                <div
-                  className="mt-5 w-full flex items-end justify-between"
-                  style={{ maxWidth: "min(720px, 90vw)" }}
+                {/* Minimized project title — fades in above dots after 5s on a project slide */}
+                <p
+                  className="text-white/55 text-[11px] font-semibold tracking-[0.18em] uppercase"
+                  style={{
+                    opacity: currentSlide > 0 && !isTitleVisible ? 1 : 0,
+                    transition: "opacity 1s ease",
+                    minHeight: "16px",
+                    marginTop: "16px",
+                  }}
                 >
-                  <div>
-                    {svc.heading.map((line, i) => (
-                      <p
-                        key={i}
-                        className="font-[family-name:var(--font-bebas)] leading-[0.88] tracking-[0.02em] text-white"
-                        style={{ fontSize: "clamp(2rem, 5.5vw, 4.5rem)" }}
-                      >
-                        {line}
-                      </p>
-                    ))}
-                    <p className="mt-1.5 text-white/35 text-[10px] tracking-[0.2em] uppercase font-light">
-                      {svc.price}
-                    </p>
-                  </div>
+                  {currentSlide > 0 ? svc.projects[currentSlide - 1].title : ""}
+                </p>
 
-                  <Link
-                    href="/booking"
-                    className="group flex items-center gap-1.5 text-[#FF6200] text-[9px] font-bold tracking-[0.25em] uppercase hover:opacity-60 transition-opacity duration-150 pb-1"
-                  >
-                    See Pricing
-                    <ArrowRight size={10} className="group-hover:translate-x-0.5 transition-transform" />
-                  </Link>
+                {/* Dot indicators */}
+                <div className="flex items-center mt-3">
+                  {Array.from({ length: totalSlides }).map((_, i) => (
+                    <button
+                      key={i}
+                      onClick={() => goToSlide(svc.id, i)}
+                      aria-label={`Slide ${i + 1}`}
+                      className="p-3"
+                    >
+                      <div
+                        className="rounded-full transition-all duration-300"
+                        style={{
+                          width: i === currentSlide ? "22px" : "5px",
+                          height: "4px",
+                          background: i === currentSlide ? "#ffffff" : "rgba(255,255,255,0.25)",
+                        }}
+                      />
+                    </button>
+                  ))}
                 </div>
+
+                <button
+                  onClick={() => setPricingModal(svc)}
+                  className="mt-8 text-[#F58A2C] text-[9px] font-bold tracking-[0.3em] uppercase hover:opacity-60 transition-opacity duration-150"
+                >
+                  See Pricing Info
+                </button>
               </div>
 
-              {/* Scroll indicator */}
-              {!isLast && (
-                <div className="absolute bottom-5 left-1/2 -translate-x-1/2 flex flex-col items-center gap-1 text-white/15 select-none">
-                  <span className="text-[8px] tracking-[0.25em] uppercase">Scroll</span>
-                  <ChevronDown size={10} className="animate-bounce" />
-                </div>
-              )}
+              <div className="absolute bottom-5 left-1/2 -translate-x-1/2 flex flex-col items-center gap-1 text-white/15 select-none z-10">
+                <span className="text-[8px] tracking-[0.25em] uppercase">Scroll</span>
+                <ChevronDown size={10} className="animate-bounce" />
+              </div>
 
-              {/* Section index */}
-              <div className="absolute bottom-5 right-6 text-white/10 font-[family-name:var(--font-bebas)] text-sm tracking-widest select-none">
+              <div className="absolute bottom-5 right-6 text-white/10 font-[family-name:var(--font-bebas)] text-sm tracking-widest select-none z-10">
                 {String(svcIdx + 1).padStart(2, "0")} / {String(SERVICES.length).padStart(2, "0")}
               </div>
             </section>
           );
         })}
 
-        {/* ── Footer snap section ── */}
+        {/* ── CTA snap section ──────────────────────────────────────────── */}
         <footer
-          className="snap-start snap-always bg-[#080808] flex flex-col items-center justify-center border-t border-[#2a2a2a]"
+          className="snap-start snap-always bg-[#080808] flex flex-col items-center justify-center"
           style={{ height: "100dvh" }}
         >
-          <div className="w-full max-w-7xl mx-auto px-6 lg:px-10 flex flex-col items-center text-center">
-            <p className="text-[#FF6200] text-[10px] font-bold tracking-[0.3em] uppercase mb-5">
+          <div className="flex flex-col items-center text-center px-6">
+            <p className="text-[#F58A2C] text-[10px] font-bold tracking-[0.3em] uppercase mb-5">
               Ready to Create
             </p>
             <h2
-              className="font-[family-name:var(--font-bebas)] leading-[0.88] text-white mb-8"
-              style={{ fontSize: "clamp(3rem,9vw,7.5rem)" }}
+              className="font-[family-name:var(--font-bebas)] leading-[0.88] text-white mb-10"
+              style={{ fontSize: "clamp(3.5rem, 10vw, 8rem)" }}
             >
               Let&apos;s Make
               <br />
-              <span className="text-[#FF6200]">Something.</span>
+              <span className="text-[#F58A2C]">Something.</span>
             </h2>
-            <Link
-              href="/booking"
-              className="inline-flex items-center gap-2 bg-[#FF6200] hover:bg-[#FF8340] text-white text-xs font-bold tracking-[0.2em] uppercase px-10 py-4 transition-colors duration-200 group mb-20"
+            <a
+              href="#"
+              onClick={(e) => e.preventDefault()}
+              className="inline-flex items-center gap-3 bg-[#F58A2C] hover:bg-[#F58A2C]/85 text-white text-xs font-bold tracking-[0.2em] uppercase px-12 py-5 transition-colors duration-200 group"
             >
               Book a Consultation
               <ArrowRight size={14} className="group-hover:translate-x-0.5 transition-transform" />
-            </Link>
-
-            <div className="w-full border-t border-[#2a2a2a] pt-8 flex flex-col sm:flex-row items-center justify-between gap-5">
-              <span className="font-[family-name:var(--font-bebas)] text-2xl tracking-widest">
-                FUGAR<span className="text-[#FF6200]">.</span>
-              </span>
-              <div className="flex flex-wrap justify-center gap-x-6 gap-y-2">
-                <a
-                  href="mailto:fugarmediato@gmail.com"
-                  className="text-white/30 hover:text-white text-xs transition-colors duration-150"
-                >
-                  fugarmediato@gmail.com
-                </a>
-                <a
-                  href="tel:6476214625"
-                  className="text-white/30 hover:text-white text-xs transition-colors duration-150"
-                >
-                  647-621-4625
-                </a>
-                <a
-                  href="https://instagram.com/fu.gar"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-white/30 hover:text-white text-xs transition-colors duration-150"
-                >
-                  @fu.gar
-                </a>
-              </div>
-              <p className="text-white/15 text-xs">
-                © {new Date().getFullYear()} Fugar Media
-              </p>
-            </div>
+            </a>
           </div>
         </footer>
       </div>
 
-      {/* ── Video modal ── */}
-      {modal && (
+      {/* ── Video modal ──────────────────────────────────────────────────── */}
+      {videoModal && (
         <div
           className="fixed inset-0 z-[200] bg-black/96 flex items-center justify-center p-4 sm:p-10"
-          onClick={() => setModal(null)}
+          onClick={() => setVideoModal(null)}
         >
           <button
             className="absolute top-5 right-6 text-white/40 hover:text-white transition-colors z-10 p-2"
-            onClick={() => setModal(null)}
+            onClick={() => setVideoModal(null)}
             aria-label="Close"
           >
             <X size={22} />
           </button>
-          <div
-            className="relative w-full max-w-5xl aspect-video"
-            onClick={(e) => e.stopPropagation()}
-          >
-            {getYouTubeId(modal) ? (
+          <div className="relative w-full max-w-5xl aspect-video" onClick={(e) => e.stopPropagation()}>
+            {getYouTubeId(videoModal) ? (
               <iframe
-                src={`https://www.youtube.com/embed/${getYouTubeId(modal)}?autoplay=1&rel=0&modestbranding=1`}
+                src={`https://www.youtube.com/embed/${getYouTubeId(videoModal)}?autoplay=1&rel=0&modestbranding=1`}
                 allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
                 allowFullScreen
                 className="absolute inset-0 w-full h-full"
                 title="Project video"
               />
             ) : (
-              <video
-                src={modal}
-                controls
-                autoPlay
-                className="absolute inset-0 w-full h-full bg-black"
-              />
+              <video src={videoModal} controls autoPlay className="absolute inset-0 w-full h-full bg-black" />
             )}
+          </div>
+        </div>
+      )}
+
+      {/* ── Orange section-transition flash ──────────────────────────────── */}
+      <div
+        className="fixed inset-0 z-[100] pointer-events-none"
+        style={{
+          background: "#F58A2C",
+          opacity: sectionFlash ? 0.35 : 0,
+          transition: sectionFlash ? "opacity 0.08s ease" : "opacity 0.35s ease",
+        }}
+      />
+
+      {/* ── "Thanks for watching" toast ──────────────────────────────────── */}
+      <div
+        className="fixed bottom-0 left-1/2 z-[300] pointer-events-none"
+        style={{
+          transform: `translateX(-50%) translateY(${thanksVisible ? "0" : "100%"})`,
+          transition: "transform 0.45s cubic-bezier(0.16,1,0.3,1)",
+        }}
+      >
+        <p className="mb-10 text-white text-sm font-semibold tracking-[0.12em] whitespace-nowrap" style={{ textShadow: "0 1px 8px rgba(0,0,0,0.8)" }}>
+          Thanks for watching 🎉
+        </p>
+      </div>
+
+      {/* ── Pricing modal ────────────────────────────────────────────────── */}
+      {pricingModal && (
+        <div
+          className="fixed inset-0 z-[200] bg-black/90 flex items-center justify-center p-4 sm:p-8"
+          onClick={() => setPricingModal(null)}
+        >
+          <div
+            className="relative w-full max-w-2xl bg-[#0a0a0a] border border-[#2a2a2a] p-8 sm:p-10 overflow-y-auto max-h-[90vh]"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <button
+              className="absolute top-5 right-5 text-white/30 hover:text-white transition-colors p-2"
+              onClick={() => setPricingModal(null)}
+              aria-label="Close"
+            >
+              <X size={18} />
+            </button>
+
+            <p className="text-[#F58A2C] text-[9px] font-bold tracking-[0.3em] uppercase mb-3">Pricing</p>
+            <h2
+              className="font-[family-name:var(--font-bebas)] text-white leading-[0.88] mb-3"
+              style={{ fontSize: "clamp(2.5rem, 7vw, 5rem)" }}
+            >
+              {pricingModal.heading.join(" ")}
+            </h2>
+            <p className="text-white/40 text-sm mb-8 max-w-md">{pricingModal.description}</p>
+
+            <div className={`grid gap-4 ${pricingModal.packages.length > 1 ? "sm:grid-cols-2" : ""}`}>
+              {pricingModal.packages.map((pkg) => (
+                <div key={pkg.name} className="relative border border-[#2a2a2a] p-6">
+                  {pkg.note && (
+                    <span className="absolute top-4 right-4 text-[8px] font-bold tracking-[0.2em] uppercase text-[#F58A2C] border border-[#F58A2C]/30 px-2 py-0.5">
+                      {pkg.note}
+                    </span>
+                  )}
+                  <p className="text-white/35 text-[9px] font-bold tracking-[0.25em] uppercase mb-2">{pkg.name}</p>
+                  <p
+                    className="font-[family-name:var(--font-bebas)] text-white tracking-wide mb-5"
+                    style={{ fontSize: "clamp(1.8rem, 4vw, 2.5rem)" }}
+                  >
+                    {pkg.price}
+                  </p>
+                  <ul className="space-y-2.5">
+                    {pkg.includes.map((item) => (
+                      <li key={item} className="flex items-start gap-2.5 text-white/55 text-xs">
+                        <span className="mt-0.5 text-[#F58A2C] shrink-0">—</span>
+                        {item}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              ))}
+            </div>
+
+            <div className="mt-8 pt-6 border-t border-[#2a2a2a] flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+              <p className="text-white/25 text-xs">Prices vary based on scope — let&apos;s talk.</p>
+              <a
+                href="#"
+                onClick={(e) => e.preventDefault()}
+                className="text-[#F58A2C] text-[9px] font-bold tracking-[0.3em] uppercase hover:opacity-60 transition-opacity duration-150 whitespace-nowrap"
+              >
+                Book a Consultation →
+              </a>
+            </div>
           </div>
         </div>
       )}
