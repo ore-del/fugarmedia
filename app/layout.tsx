@@ -42,6 +42,12 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       lang="en"
       className={`${montserrat.variable} ${bebasNeue.variable} ${anton.variable}`}
     >
+      <head>
+        <link
+          rel="stylesheet"
+          href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&icon_names=play_arrow"
+        />
+      </head>
       <body className="font-[family-name:var(--font-montserrat)] min-h-screen flex flex-col">
         {children}
       </body>
