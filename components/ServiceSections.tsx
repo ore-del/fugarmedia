@@ -2,7 +2,6 @@
 
 import { useState, useEffect, useCallback, useRef } from "react";
 import Image from "next/image";
-import Link from "next/link";
 import { X, ChevronDown, ArrowRight } from "lucide-react";
 
 type Project = {
@@ -376,7 +375,7 @@ export default function ServiceSections() {
           transition: splashPhase === "hidden" ? "opacity 0.4s ease" : "none",
         }}
       >
-        <Link href="/" className="pointer-events-auto relative h-9 w-32">
+        <a href="/" className="pointer-events-auto relative h-9 w-32 block">
           <Image
             src="/logo2.png"
             alt="Fugar Media"
@@ -384,7 +383,7 @@ export default function ServiceSections() {
             className="object-contain"
             priority
           />
-        </Link>
+        </a>
       </nav>
 
       {/* ── Scroll-snap container ────────────────────────────────────────── */}
@@ -398,6 +397,11 @@ export default function ServiceSections() {
           className="relative snap-start snap-always bg-black flex flex-col items-center justify-center overflow-hidden"
           style={{ height: "100dvh" }}
         >
+          {/* Feature image background (fallback layer) */}
+          <div className="absolute inset-0 pointer-events-none">
+            <Image src="/feature-image-home.png" alt="" fill className="object-cover" priority />
+          </div>
+
           {/* YouTube background */}
           <div className="absolute inset-0 pointer-events-none overflow-hidden">
             <iframe
@@ -540,11 +544,14 @@ export default function ServiceSections() {
                             {slide.proj.videoUrl && (
                               <button
                                 onClick={() => setVideoModal(slide.proj.videoUrl!)}
-                                className="mb-4 w-14 h-14 border border-white/40 flex items-center justify-center text-white hover:border-[#F58A2C] hover:text-[#F58A2C] transition-colors duration-200"
+                                className="mb-4 text-white hover:text-[#F58A2C] transition-colors duration-200"
                               >
-                                <svg xmlns="http://www.w3.org/2000/svg" height="28px" viewBox="0 -960 960 960" width="28px" fill="currentColor">
-                                  <path d="M320-200v-560l440 280-440 280Z"/>
-                                </svg>
+                                <span
+                                  className="material-symbols-rounded"
+                                  style={{ fontSize: "64px", fontVariationSettings: "'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 48" }}
+                                >
+                                  play_circle
+                                </span>
                               </button>
                             )}
 
@@ -630,7 +637,7 @@ export default function ServiceSections() {
 
         {/* ── CTA snap section ──────────────────────────────────────────── */}
         <footer
-          className="snap-start snap-always bg-[#080808] flex flex-col items-center justify-center"
+          className="snap-start snap-always bg-[#080808] flex flex-col items-center justify-center relative"
           style={{ height: "100dvh" }}
         >
           <div className="flex flex-col items-center text-center px-6">
@@ -654,6 +661,20 @@ export default function ServiceSections() {
               <ArrowRight size={14} className="group-hover:translate-x-0.5 transition-transform" />
             </a>
           </div>
+
+          {/* Signature — fades out before teaser appears */}
+          <a
+            href="https://worldcup.la-fleur.digital/"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="absolute bottom-8 left-1/2 -translate-x-1/2"
+            style={{
+              opacity: thanksVisible ? 0 : 1,
+              transition: thanksVisible ? "opacity 0.2s ease" : "opacity 0.5s ease 0.1s",
+            }}
+          >
+            <Image src="/signature-link.svg" alt="Design by La Fleur" width={162} height={20} />
+          </a>
         </footer>
       </div>
 
