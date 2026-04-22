@@ -2,7 +2,6 @@
 
 import { useState, useEffect, useCallback, useRef } from "react";
 import Image from "next/image";
-import Link from "next/link";
 import { X, ChevronDown, ArrowRight } from "lucide-react";
 
 type Project = {
@@ -376,7 +375,7 @@ export default function ServiceSections() {
           transition: splashPhase === "hidden" ? "opacity 0.4s ease" : "none",
         }}
       >
-        <Link href="/" className="pointer-events-auto relative h-9 w-32">
+        <a href="/" className="pointer-events-auto relative h-9 w-32 block">
           <Image
             src="/logo2.png"
             alt="Fugar Media"
@@ -384,7 +383,7 @@ export default function ServiceSections() {
             className="object-contain"
             priority
           />
-        </Link>
+        </a>
       </nav>
 
       {/* ── Scroll-snap container ────────────────────────────────────────── */}
