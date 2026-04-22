@@ -2,10 +2,11 @@
 
 import { useState, useEffect, useCallback, useRef } from "react";
 import Image from "next/image";
-import { ChevronLeft, ChevronRight, Play, X, ChevronDown } from "lucide-react";
+import { ChevronLeft, ChevronRight, Play, X, ChevronDown, ArrowRight } from "lucide-react";
 
 type Project = {
   title: string;
+  description: string;
   client: string;
   year: string;
   videoUrl?: string;
@@ -59,9 +60,24 @@ const SERVICES: ServiceDef[] = [
       },
     ],
     projects: [
-      { title: "Add your project title", client: "Artist / Label", year: "2024" },
-      { title: "Add your project title", client: "Artist / Label", year: "2024" },
-      { title: "Add your project title", client: "Artist / Label", year: "2023" },
+      {
+        title: "Music Video 1",
+        description: "High-energy visual featuring artist performance across multiple locations.",
+        client: "Artist / Label",
+        year: "2024",
+      },
+      {
+        title: "Music Video 2",
+        description: "Cinematic narrative-driven piece with choreographed sequences and dynamic lighting.",
+        client: "Artist / Label",
+        year: "2024",
+      },
+      {
+        title: "Music Video 3",
+        description: "Concept-driven production blending performance and abstract visual elements.",
+        client: "Artist / Label",
+        year: "2023",
+      },
     ],
   },
   {
@@ -83,8 +99,24 @@ const SERVICES: ServiceDef[] = [
       },
     ],
     projects: [
-      { title: "Add your project title", client: "Creator / Brand", year: "2024" },
-      { title: "Add your project title", client: "Creator / Brand", year: "2024" },
+      {
+        title: "Reel 1",
+        description: "Fast-paced social content optimized for Instagram Reels and TikTok engagement.",
+        client: "Creator / Brand",
+        year: "2024",
+      },
+      {
+        title: "Reel 2",
+        description: "Behind-the-scenes brand content capturing authentic moments and product highlights.",
+        client: "Creator / Brand",
+        year: "2024",
+      },
+      {
+        title: "Reel 3",
+        description: "Lifestyle reel series featuring the artist in dynamic urban environments.",
+        client: "Creator / Brand",
+        year: "2024",
+      },
     ],
   },
   {
@@ -106,8 +138,24 @@ const SERVICES: ServiceDef[] = [
       },
     ],
     projects: [
-      { title: "Add your project title", client: "DJ Name", year: "2024" },
-      { title: "Add your project title", client: "DJ Name", year: "2024" },
+      {
+        title: "DJ Set 1",
+        description: "Multi-camera live session recorded at an intimate venue with professional audio mix.",
+        client: "DJ Name",
+        year: "2024",
+      },
+      {
+        title: "DJ Set 2",
+        description: "High-energy rooftop performance captured with cinematic drone and ground angles.",
+        client: "DJ Name",
+        year: "2024",
+      },
+      {
+        title: "DJ Set 3",
+        description: "Studio livestream session featuring guest appearances and exclusive transitions.",
+        client: "DJ Name",
+        year: "2024",
+      },
     ],
   },
   {
@@ -129,8 +177,24 @@ const SERVICES: ServiceDef[] = [
       },
     ],
     projects: [
-      { title: "Add your project title", client: "Brand / Artist", year: "2024" },
-      { title: "Add your project title", client: "Brand / Artist", year: "2024" },
+      {
+        title: "Editorial 1",
+        description: "Fashion editorial exploring texture and contrast through bold wardrobe choices.",
+        client: "Brand / Artist",
+        year: "2024",
+      },
+      {
+        title: "Editorial 2",
+        description: "Artist portrait series with environmental storytelling and natural lighting.",
+        client: "Brand / Artist",
+        year: "2024",
+      },
+      {
+        title: "Editorial 3",
+        description: "Brand campaign shoot delivering commercial-grade imagery for digital and print.",
+        client: "Brand / Artist",
+        year: "2024",
+      },
     ],
   },
 ];
@@ -224,7 +288,7 @@ export default function ServiceSections() {
         <a
           href="#"
           onClick={(e) => e.preventDefault()}
-          className="pointer-events-auto text-[#FF6200] text-[9px] sm:text-[10px] font-bold tracking-[0.28em] uppercase hover:opacity-60 transition-opacity duration-150"
+          className="pointer-events-auto text-[#F58A2C] text-[9px] sm:text-[10px] font-bold tracking-[0.28em] uppercase hover:opacity-60 transition-opacity duration-150"
         >
           Book a Consultation
         </a>
@@ -243,7 +307,6 @@ export default function ServiceSections() {
           const hasMedia = !!(proj.videoUrl || thumb);
           const isVis = visible.has(svc.id);
           const isFading = fading[svc.id];
-          const isLast = svcIdx === SERVICES.length - 1;
 
           return (
             <section
@@ -253,26 +316,22 @@ export default function ServiceSections() {
               style={{ height: "100dvh" }}
             >
               {/* Left arrow */}
-              {svc.projects.length > 1 && (
-                <button
-                  onClick={() => navigate(svc.id, "prev")}
-                  aria-label="Previous project"
-                  className="absolute left-3 sm:left-5 top-1/2 -translate-y-1/2 z-10 p-3 text-white/25 hover:text-white transition-colors duration-200"
-                >
-                  <ChevronLeft size={28} strokeWidth={1} />
-                </button>
-              )}
+              <button
+                onClick={() => navigate(svc.id, "prev")}
+                aria-label="Previous project"
+                className="absolute left-3 sm:left-5 top-1/2 -translate-y-1/2 z-10 p-3 text-white/25 hover:text-white transition-colors duration-200"
+              >
+                <ChevronLeft size={28} strokeWidth={1} />
+              </button>
 
               {/* Right arrow */}
-              {svc.projects.length > 1 && (
-                <button
-                  onClick={() => navigate(svc.id, "next")}
-                  aria-label="Next project"
-                  className="absolute right-3 sm:right-5 top-1/2 -translate-y-1/2 z-10 p-3 text-white/25 hover:text-white transition-colors duration-200"
-                >
-                  <ChevronRight size={28} strokeWidth={1} />
-                </button>
-              )}
+              <button
+                onClick={() => navigate(svc.id, "next")}
+                aria-label="Next project"
+                className="absolute right-3 sm:right-5 top-1/2 -translate-y-1/2 z-10 p-3 text-white/25 hover:text-white transition-colors duration-200"
+              >
+                <ChevronRight size={28} strokeWidth={1} />
+              </button>
 
               {/* Center content */}
               <div
@@ -297,14 +356,27 @@ export default function ServiceSections() {
                 </div>
 
                 {/* Price */}
-                <p className="text-white/40 text-xs tracking-[0.2em] uppercase font-light">
+                <p className="text-white text-xs tracking-[0.2em] uppercase font-light">
                   {svc.price}
                 </p>
+
+                {/* Project info — fades during navigation */}
+                <div
+                  className="mt-6 flex flex-col items-center"
+                  style={{ opacity: isFading ? 0 : 1, transition: "opacity 0.2s ease" }}
+                >
+                  <p className="text-white/70 text-sm font-semibold tracking-wide">
+                    {proj.title}
+                  </p>
+                  <p className="text-white/35 text-xs mt-1.5 max-w-xs leading-relaxed">
+                    {proj.description}
+                  </p>
+                </div>
 
                 {/* Portfolio card — only shown when real media exists */}
                 {hasMedia && (
                   <div
-                    className="relative mt-8 w-full max-w-xs aspect-video overflow-hidden cursor-pointer group"
+                    className="relative mt-6 w-full max-w-xs aspect-video overflow-hidden cursor-pointer group"
                     style={{
                       opacity: isFading ? 0 : 1,
                       transition: "opacity 0.2s ease",
@@ -326,49 +398,40 @@ export default function ServiceSections() {
                         </div>
                       </div>
                     )}
-                    <div className="absolute bottom-0 left-0 right-0 px-3 py-2 bg-gradient-to-t from-black/70 to-transparent">
-                      <p className="text-white/80 text-[10px] font-medium tracking-wide truncate">
-                        {proj.title}
-                      </p>
-                    </div>
                   </div>
                 )}
 
                 {/* Dot nav */}
-                {svc.projects.length > 1 && (
-                  <div className="flex items-center justify-center gap-[6px] mt-5">
-                    {svc.projects.map((_, i) => (
-                      <button
-                        key={i}
-                        onClick={() => setProjIdx((p) => ({ ...p, [svc.id]: i }))}
-                        aria-label={`Project ${i + 1}`}
-                        className="rounded-full transition-all duration-300"
-                        style={{
-                          width: i === pi ? "14px" : "3px",
-                          height: "2px",
-                          background: i === pi ? "#ffffff" : "rgba(255,255,255,0.2)",
-                        }}
-                      />
-                    ))}
-                  </div>
-                )}
+                <div className="flex items-center justify-center gap-[6px] mt-6">
+                  {svc.projects.map((_, i) => (
+                    <button
+                      key={i}
+                      onClick={() => setProjIdx((p) => ({ ...p, [svc.id]: i }))}
+                      aria-label={`Project ${i + 1}`}
+                      className="rounded-full transition-all duration-300"
+                      style={{
+                        width: i === pi ? "14px" : "3px",
+                        height: "2px",
+                        background: i === pi ? "#ffffff" : "rgba(255,255,255,0.2)",
+                      }}
+                    />
+                  ))}
+                </div>
 
-                {/* SEE PRICING */}
+                {/* SEE PRICING DETAILS */}
                 <button
                   onClick={() => setPricingModal(svc)}
-                  className="mt-10 text-[#FF6200] text-[9px] font-bold tracking-[0.3em] uppercase hover:opacity-60 transition-opacity duration-150"
+                  className="mt-8 text-[#F58A2C] text-[9px] font-bold tracking-[0.3em] uppercase hover:opacity-60 transition-opacity duration-150"
                 >
-                  See Pricing
+                  See Pricing Details
                 </button>
               </div>
 
               {/* Scroll indicator */}
-              {!isLast && (
-                <div className="absolute bottom-5 left-1/2 -translate-x-1/2 flex flex-col items-center gap-1 text-white/15 select-none">
-                  <span className="text-[8px] tracking-[0.25em] uppercase">Scroll</span>
-                  <ChevronDown size={10} className="animate-bounce" />
-                </div>
-              )}
+              <div className="absolute bottom-5 left-1/2 -translate-x-1/2 flex flex-col items-center gap-1 text-white/15 select-none">
+                <span className="text-[8px] tracking-[0.25em] uppercase">Scroll</span>
+                <ChevronDown size={10} className="animate-bounce" />
+              </div>
 
               {/* Section index */}
               <div className="absolute bottom-5 right-6 text-white/10 font-[family-name:var(--font-bebas)] text-sm tracking-widest select-none">
@@ -377,6 +440,34 @@ export default function ServiceSections() {
             </section>
           );
         })}
+
+        {/* ── CTA snap section ── */}
+        <footer
+          className="snap-start snap-always bg-[#080808] flex flex-col items-center justify-center"
+          style={{ height: "100dvh" }}
+        >
+          <div className="flex flex-col items-center text-center px-6">
+            <p className="text-[#F58A2C] text-[10px] font-bold tracking-[0.3em] uppercase mb-5">
+              Ready to Create
+            </p>
+            <h2
+              className="font-[family-name:var(--font-bebas)] leading-[0.88] text-white mb-10"
+              style={{ fontSize: "clamp(3.5rem, 10vw, 8rem)" }}
+            >
+              Let&apos;s Make
+              <br />
+              <span className="text-[#F58A2C]">Something.</span>
+            </h2>
+            <a
+              href="#"
+              onClick={(e) => e.preventDefault()}
+              className="inline-flex items-center gap-3 bg-[#F58A2C] hover:bg-[#F58A2C]/85 text-white text-xs font-bold tracking-[0.2em] uppercase px-12 py-5 transition-colors duration-200 group"
+            >
+              Book a Consultation
+              <ArrowRight size={14} className="group-hover:translate-x-0.5 transition-transform" />
+            </a>
+          </div>
+        </footer>
       </div>
 
       {/* ── Video modal ── */}
@@ -436,7 +527,7 @@ export default function ServiceSections() {
             </button>
 
             {/* Header */}
-            <p className="text-[#FF6200] text-[9px] font-bold tracking-[0.3em] uppercase mb-3">
+            <p className="text-[#F58A2C] text-[9px] font-bold tracking-[0.3em] uppercase mb-3">
               Pricing
             </p>
             <h2
@@ -458,7 +549,7 @@ export default function ServiceSections() {
               {pricingModal.packages.map((pkg) => (
                 <div key={pkg.name} className="relative border border-[#2a2a2a] p-6">
                   {pkg.note && (
-                    <span className="absolute top-4 right-4 text-[8px] font-bold tracking-[0.2em] uppercase text-[#FF6200] border border-[#FF6200]/30 px-2 py-0.5">
+                    <span className="absolute top-4 right-4 text-[8px] font-bold tracking-[0.2em] uppercase text-[#F58A2C] border border-[#F58A2C]/30 px-2 py-0.5">
                       {pkg.note}
                     </span>
                   )}
@@ -474,7 +565,7 @@ export default function ServiceSections() {
                   <ul className="space-y-2.5">
                     {pkg.includes.map((item) => (
                       <li key={item} className="flex items-start gap-2.5 text-white/55 text-xs">
-                        <span className="mt-0.5 text-[#FF6200] shrink-0">—</span>
+                        <span className="mt-0.5 text-[#F58A2C] shrink-0">—</span>
                         {item}
                       </li>
                     ))}
@@ -491,7 +582,7 @@ export default function ServiceSections() {
               <a
                 href="#"
                 onClick={(e) => e.preventDefault()}
-                className="text-[#FF6200] text-[9px] font-bold tracking-[0.3em] uppercase hover:opacity-60 transition-opacity duration-150 whitespace-nowrap"
+                className="text-[#F58A2C] text-[9px] font-bold tracking-[0.3em] uppercase hover:opacity-60 transition-opacity duration-150 whitespace-nowrap"
               >
                 Book a Consultation →
               </a>
