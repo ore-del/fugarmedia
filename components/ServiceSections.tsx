@@ -229,7 +229,7 @@ export default function ServiceSections() {
                 slideMapRef.current = { ...slideMapRef.current, [svc.id]: 1 };
                 setSlideMap((prev) => ({ ...prev, [svc.id]: 1 }));
                 startTitleHideTimer(svc.id);
-              }, 3000);
+              }, 5000);
             }
           } else {
             setSectionInView((prev) => {
@@ -408,12 +408,11 @@ export default function ServiceSections() {
               title="Hero background video"
             />
           </div>
-          <div className="absolute inset-0 bg-black/55 pointer-events-none" />
 
           {/* Tagline */}
           <p
             className="relative font-[family-name:var(--font-anton)] text-[#F58A2C] text-center leading-[1.05] px-6 sm:px-10 uppercase"
-            style={{ fontSize: "clamp(2.4rem, 7.5vw, 6rem)", maxWidth: "900px" }}
+            style={{ fontSize: "clamp(2.4rem, 7.5vw, 6rem)", maxWidth: "900px", textShadow: "0 2px 24px rgba(0,0,0,0.9)" }}
           >
             Documenting the Human Experience in the Most Beautiful Way Possible
           </p>
@@ -468,11 +467,10 @@ export default function ServiceSections() {
                 </div>
               )}
               {isInView && !activeBgVideoId && activeBgImage && (
-                <div className="absolute inset-0">
+                <div className="absolute inset-0 pointer-events-none">
                   <Image src={activeBgImage} alt="" fill className="object-cover" />
                 </div>
               )}
-              <div className="absolute inset-0 bg-black/52 pointer-events-none" />
 
               <button
                 onClick={() => navigate(svc.id, "prev")}
@@ -496,7 +494,7 @@ export default function ServiceSections() {
 
               {/* Entrance wrapper */}
               <div
-                className="relative z-10 flex flex-col items-center w-full"
+                className="relative flex flex-col items-center w-full"
                 style={{
                   transition: "opacity 0.75s cubic-bezier(0.16,1,0.3,1), transform 0.75s cubic-bezier(0.16,1,0.3,1)",
                   opacity: isVis ? 1 : 0,
@@ -527,12 +525,12 @@ export default function ServiceSections() {
                               <h2
                                 key={li}
                                 className="font-[family-name:var(--font-bebas)] leading-[0.88] tracking-[0.02em] text-white"
-                                style={{ fontSize: "clamp(2.5rem, 11vw, 8rem)" }}
+                                style={{ fontSize: "clamp(2.5rem, 11vw, 8rem)", textShadow: "0 2px 20px rgba(0,0,0,0.85)" }}
                               >
                                 {line}
                               </h2>
                             ))}
-                            <p className="text-white text-xs tracking-[0.2em] uppercase font-light mt-3">
+                            <p className="text-white text-xs tracking-[0.2em] uppercase font-light mt-3" style={{ textShadow: "0 1px 8px rgba(0,0,0,0.9)" }}>
                               {svc.price}
                             </p>
                           </>
@@ -544,12 +542,9 @@ export default function ServiceSections() {
                                 onClick={() => setVideoModal(slide.proj.videoUrl!)}
                                 className="mb-4 w-14 h-14 border border-white/40 flex items-center justify-center text-white hover:border-[#F58A2C] hover:text-[#F58A2C] transition-colors duration-200"
                               >
-                                <span
-                                  className="material-symbols-rounded"
-                                  style={{ fontVariationSettings: "'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 24", fontSize: "28px", lineHeight: 1, userSelect: "none" }}
-                                >
-                                  play_arrow
-                                </span>
+                                <svg xmlns="http://www.w3.org/2000/svg" height="28px" viewBox="0 -960 960 960" width="28px" fill="currentColor">
+                                  <path d="M320-200v-560l440 280-440 280Z"/>
+                                </svg>
                               </button>
                             )}
 
@@ -560,6 +555,7 @@ export default function ServiceSections() {
                                 fontSize: "clamp(2.5rem, 11vw, 8rem)",
                                 opacity: isTitleVisible ? 1 : 0,
                                 transition: "opacity 1s ease",
+                                textShadow: "0 2px 20px rgba(0,0,0,0.85)",
                               }}
                             >
                               {slide.proj.title}
@@ -567,7 +563,7 @@ export default function ServiceSections() {
 
                             {/* Description — fades out after 5s */}
                             <div style={{ opacity: isTitleVisible ? 1 : 0, transition: "opacity 1s ease" }}>
-                              <p className="text-white/60 text-sm mt-2 max-w-sm truncate">
+                              <p className="text-white/80 text-sm mt-2 max-w-sm truncate" style={{ textShadow: "0 1px 8px rgba(0,0,0,0.9)" }}>
                                 {slide.proj.description}
                               </p>
                             </div>
