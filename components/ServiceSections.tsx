@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback, useRef } from "react";
 import Image from "next/image";
+import Link from "next/link";
 import { ChevronLeft, ChevronRight, Play, X, ChevronDown, ArrowRight } from "lucide-react";
 
 type Project = {
@@ -153,11 +154,22 @@ function getThumb(videoUrl?: string): string | null {
 }
 
 export default function ServiceSections() {
-  // slide 0 = category intro, slide 1..N = projects
+  // ── Splash animation state ──────────────────────────────────────────────
+  // 'visible'  → full-screen logo shown
+  // 'animating'→ logo flying to nav, overlay fading
+  // 'hidden'   → splash removed, nav + page visible
+  const [splashPhase, setSplashPhase] = useState<"visible" | "animating" | "hidden">("visible");
+
+  useEffect(() => {
+    const t1 = setTimeout(() => setSplashPhase("animating"), 1600);
+    const t2 = setTimeout(() => setSplashPhase("hidden"), 2900);
+    return () => { clearTimeout(t1); clearTimeout(t2); };
+  }, []);
+
+  // ── Carousel state ──────────────────────────────────────────────────────
   const [slideMap, setSlideMap] = useState<Record<string, number>>(
     Object.fromEntries(SERVICES.map((s) => [s.id, 0]))
   );
-  // whether project title/description is visible (fades out after 5s on a project slide)
   const [titleVisible, setTitleVisible] = useState<Record<string, boolean>>(
     Object.fromEntries(SERVICES.map((s) => [s.id, true]))
   );
@@ -166,19 +178,15 @@ export default function ServiceSections() {
   const [visible, setVisible] = useState<Set<string>>(new Set());
   const scrollRef = useRef<HTMLDivElement>(null);
 
-  // Track current slide values in a ref for use inside callbacks without stale closures
   const slideMapRef = useRef<Record<string, number>>(
     Object.fromEntries(SERVICES.map((s) => [s.id, 0]))
   );
-  // One-time auto-advance: fires once per service when it enters the viewport
   const autoAdvanceTimerRef = useRef<Record<string, ReturnType<typeof setTimeout> | null>>(
     Object.fromEntries(SERVICES.map((s) => [s.id, null]))
   );
-  // Per-slide title-hide timer: starts when landing on a project slide
   const titleHideTimerRef = useRef<Record<string, ReturnType<typeof setTimeout> | null>>(
     Object.fromEntries(SERVICES.map((s) => [s.id, null]))
   );
-  // Tracks whether the one-time auto-advance has fired
   const hasAutoAdvancedRef = useRef<Record<string, boolean>>(
     Object.fromEntries(SERVICES.map((s) => [s.id, false]))
   );
@@ -191,7 +199,6 @@ export default function ServiceSections() {
     }, 5000);
   }, []);
 
-  // Intersection observer — triggers entrance animation and one-time auto-advance
   useEffect(() => {
     const observers: IntersectionObserver[] = [];
     SERVICES.forEach((svc) => {
@@ -201,7 +208,6 @@ export default function ServiceSections() {
         ([entry]) => {
           if (entry.isIntersecting) {
             setVisible((prev) => new Set([...prev, svc.id]));
-            // Fire one-time auto-advance to project 1 after 3s
             if (!hasAutoAdvancedRef.current[svc.id]) {
               hasAutoAdvancedRef.current[svc.id] = true;
               autoAdvanceTimerRef.current[svc.id] = setTimeout(() => {
@@ -220,7 +226,6 @@ export default function ServiceSections() {
     return () => observers.forEach((o) => o.disconnect());
   }, [startTitleHideTimer]);
 
-  // Cleanup all timers on unmount
   useEffect(() => {
     const autoRefs = autoAdvanceTimerRef.current;
     const titleRefs = titleHideTimerRef.current;
@@ -230,7 +235,6 @@ export default function ServiceSections() {
     };
   }, []);
 
-  // Close modals on Escape
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       if (e.key === "Escape") { setVideoModal(null); setPricingModal(null); }
@@ -245,16 +249,12 @@ export default function ServiceSections() {
     const next = dir === "next"
       ? (current + 1) % totalSlides
       : (current - 1 + totalSlides) % totalSlides;
-
     slideMapRef.current = { ...slideMapRef.current, [svcId]: next };
     setSlideMap((prev) => ({ ...prev, [svcId]: next }));
-
     if (next === 0) {
-      // Back to intro — clear hide timer, restore title
       if (titleHideTimerRef.current[svcId]) clearTimeout(titleHideTimerRef.current[svcId]!);
       setTitleVisible((prev) => ({ ...prev, [svcId]: true }));
     } else {
-      // Project slide — show title, then hide after 5s
       startTitleHideTimer(svcId);
     }
   }, [startTitleHideTimer]);
@@ -262,7 +262,6 @@ export default function ServiceSections() {
   const goToSlide = useCallback((svcId: string, idx: number) => {
     slideMapRef.current = { ...slideMapRef.current, [svcId]: idx };
     setSlideMap((prev) => ({ ...prev, [svcId]: idx }));
-
     if (idx === 0) {
       if (titleHideTimerRef.current[svcId]) clearTimeout(titleHideTimerRef.current[svcId]!);
       setTitleVisible((prev) => ({ ...prev, [svcId]: true }));
@@ -273,22 +272,93 @@ export default function ServiceSections() {
 
   return (
     <>
-      {/* ── Fixed navigation ── */}
-      <nav className="fixed top-0 left-0 right-0 z-50 flex items-center justify-between px-6 sm:px-10 py-5 pointer-events-none">
-        <div className="pointer-events-auto relative h-9 w-32">
-          <Image src="/logo2.png" alt="Fugar Media" fill className="object-contain object-left" priority />
-        </div>
-        <a
-          href="#"
-          onClick={(e) => e.preventDefault()}
-          className="pointer-events-auto text-[#F58A2C] text-[9px] sm:text-[10px] font-bold tracking-[0.28em] uppercase hover:opacity-60 transition-opacity duration-150"
+      {/* ── Splash: dark overlay ─────────────────────────────────────────── */}
+      {splashPhase !== "hidden" && (
+        <div
+          className="fixed inset-0 z-[500] bg-black pointer-events-none"
+          style={{
+            opacity: splashPhase === "visible" ? 1 : 0,
+            transition: splashPhase === "animating" ? "opacity 1s ease 0.15s" : "none",
+          }}
+        />
+      )}
+
+      {/* ── Splash: logo flying to nav ───────────────────────────────────── */}
+      {splashPhase !== "hidden" && (
+        <div
+          className="fixed z-[501] pointer-events-none"
+          style={{
+            left: "50%",
+            top: splashPhase === "visible" ? "50%" : "20px",
+            width: "min(72vw, 340px)",
+            height: "min(40vw, 190px)",
+            transform: splashPhase === "visible"
+              ? "translateX(-50%) translateY(-50%)"
+              : "translateX(-50%) translateY(0) scale(0.30)",
+            opacity: splashPhase === "animating" ? 0 : 1,
+            transition: splashPhase === "animating"
+              ? "top 1s cubic-bezier(0.16,1,0.3,1), transform 1s cubic-bezier(0.16,1,0.3,1), opacity 0.65s ease 0.35s"
+              : "none",
+          }}
         >
-          Book a Consultation
-        </a>
+          <Image src="/logo2.png" alt="FUGAR" fill className="object-contain" priority />
+        </div>
+      )}
+
+      {/* ── Fixed navigation ─────────────────────────────────────────────── */}
+      <nav
+        className="fixed top-0 left-0 right-0 z-50 flex items-center justify-center py-5 pointer-events-none"
+        style={{
+          opacity: splashPhase === "hidden" ? 1 : 0,
+          transition: "opacity 0.5s ease",
+        }}
+      >
+        <Link href="/" className="pointer-events-auto relative h-9 w-32">
+          <Image
+            src="/logo2.png"
+            alt="Fugar Media"
+            fill
+            className="object-contain"
+            priority
+          />
+        </Link>
       </nav>
 
-      {/* ── Scroll-snap container ── */}
-      <div ref={scrollRef} className="snap-y snap-mandatory overflow-y-scroll" style={{ height: "100dvh" }}>
+      {/* ── Scroll-snap container ────────────────────────────────────────── */}
+      <div
+        ref={scrollRef}
+        className="snap-y snap-mandatory overflow-y-scroll"
+        style={{ height: "100dvh" }}
+      >
+        {/* ── Hero section ──────────────────────────────────────────────── */}
+        <section
+          className="relative snap-start snap-always bg-black flex flex-col items-center justify-center"
+          style={{ height: "100dvh" }}
+        >
+          {/* Large logo */}
+          <div
+            className="relative mb-8"
+            style={{ width: "min(68vw, 340px)", height: "min(38vw, 190px)" }}
+          >
+            <Image src="/logo2.png" alt="FUGAR" fill className="object-contain" priority />
+          </div>
+
+          {/* Tagline */}
+          <p
+            className="font-[family-name:var(--font-bebas)] text-[#F58A2C] text-center leading-[0.92] tracking-wide px-8"
+            style={{ fontSize: "clamp(1.5rem, 5vw, 3.2rem)", maxWidth: "680px" }}
+          >
+            Documenting the Human Experience in the Most Beautiful Way Possible
+          </p>
+
+          {/* Scroll indicator */}
+          <div className="absolute bottom-5 left-1/2 -translate-x-1/2 flex flex-col items-center gap-1 text-white/15 select-none">
+            <span className="text-[8px] tracking-[0.25em] uppercase">Scroll</span>
+            <ChevronDown size={10} className="animate-bounce" />
+          </div>
+        </section>
+
+        {/* ── Service sections ──────────────────────────────────────────── */}
         {SERVICES.map((svc, svcIdx) => {
           const currentSlide = slideMap[svc.id];
           const isVis = visible.has(svc.id);
@@ -307,7 +377,6 @@ export default function ServiceSections() {
               className="relative snap-start snap-always bg-black flex flex-col items-center justify-center overflow-hidden"
               style={{ height: "100dvh" }}
             >
-              {/* Left arrow */}
               <button
                 onClick={() => navigate(svc.id, "prev")}
                 aria-label="Previous"
@@ -316,7 +385,6 @@ export default function ServiceSections() {
                 <ChevronLeft size={30} strokeWidth={1} />
               </button>
 
-              {/* Right arrow */}
               <button
                 onClick={() => navigate(svc.id, "next")}
                 aria-label="Next"
@@ -335,7 +403,10 @@ export default function ServiceSections() {
                 }}
               >
                 {/* Slide area */}
-                <div className="relative overflow-hidden w-full px-16 sm:px-24" style={{ height: "min(260px, 40vh)" }}>
+                <div
+                  className="relative overflow-hidden w-full px-16 sm:px-24"
+                  style={{ height: "min(260px, 40vh)" }}
+                >
                   {slides.map((slide, i) => {
                     const delta = i - currentSlide;
                     return (
@@ -366,7 +437,7 @@ export default function ServiceSections() {
                           </>
                         ) : (
                           <>
-                            {/* Title + description fade out after 5s to reveal background video */}
+                            {/* Fades out after 5s to reveal background video */}
                             <div
                               style={{
                                 opacity: isTitleVisible ? 1 : 0,
@@ -383,7 +454,6 @@ export default function ServiceSections() {
                                 {slide.proj.description}
                               </p>
                             </div>
-                            {/* Video thumbnail if media exists */}
                             {slide.proj.videoUrl && (
                               <div
                                 className="relative mt-4 w-48 aspect-video overflow-hidden cursor-pointer group"
@@ -426,7 +496,6 @@ export default function ServiceSections() {
                   ))}
                 </div>
 
-                {/* SEE PRICING INFO */}
                 <button
                   onClick={() => setPricingModal(svc)}
                   className="mt-8 text-[#F58A2C] text-[9px] font-bold tracking-[0.3em] uppercase hover:opacity-60 transition-opacity duration-150"
@@ -435,13 +504,11 @@ export default function ServiceSections() {
                 </button>
               </div>
 
-              {/* Scroll indicator */}
               <div className="absolute bottom-5 left-1/2 -translate-x-1/2 flex flex-col items-center gap-1 text-white/15 select-none">
                 <span className="text-[8px] tracking-[0.25em] uppercase">Scroll</span>
                 <ChevronDown size={10} className="animate-bounce" />
               </div>
 
-              {/* Section index */}
               <div className="absolute bottom-5 right-6 text-white/10 font-[family-name:var(--font-bebas)] text-sm tracking-widest select-none">
                 {String(svcIdx + 1).padStart(2, "0")} / {String(SERVICES.length).padStart(2, "0")}
               </div>
@@ -449,7 +516,7 @@ export default function ServiceSections() {
           );
         })}
 
-        {/* ── CTA snap section ── */}
+        {/* ── CTA snap section ──────────────────────────────────────────── */}
         <footer
           className="snap-start snap-always bg-[#080808] flex flex-col items-center justify-center"
           style={{ height: "100dvh" }}
@@ -478,7 +545,7 @@ export default function ServiceSections() {
         </footer>
       </div>
 
-      {/* ── Video modal ── */}
+      {/* ── Video modal ──────────────────────────────────────────────────── */}
       {videoModal && (
         <div
           className="fixed inset-0 z-[200] bg-black/96 flex items-center justify-center p-4 sm:p-10"
@@ -507,7 +574,7 @@ export default function ServiceSections() {
         </div>
       )}
 
-      {/* ── Pricing modal ── */}
+      {/* ── Pricing modal ────────────────────────────────────────────────── */}
       {pricingModal && (
         <div
           className="fixed inset-0 z-[200] bg-black/90 flex items-center justify-center p-4 sm:p-8"
