@@ -157,37 +157,41 @@ export default function ServiceSections() {
   const [slideMap, setSlideMap] = useState<Record<string, number>>(
     Object.fromEntries(SERVICES.map((s) => [s.id, 0]))
   );
+  // whether project title/description is visible (fades out after 5s on a project slide)
+  const [titleVisible, setTitleVisible] = useState<Record<string, boolean>>(
+    Object.fromEntries(SERVICES.map((s) => [s.id, true]))
+  );
   const [videoModal, setVideoModal] = useState<string | null>(null);
   const [pricingModal, setPricingModal] = useState<ServiceDef | null>(null);
   const [visible, setVisible] = useState<Set<string>>(new Set());
   const scrollRef = useRef<HTMLDivElement>(null);
-  const timerRefs = useRef<Record<string, ReturnType<typeof setInterval> | null>>(
+
+  // Track current slide values in a ref for use inside callbacks without stale closures
+  const slideMapRef = useRef<Record<string, number>>(
+    Object.fromEntries(SERVICES.map((s) => [s.id, 0]))
+  );
+  // One-time auto-advance: fires once per service when it enters the viewport
+  const autoAdvanceTimerRef = useRef<Record<string, ReturnType<typeof setTimeout> | null>>(
     Object.fromEntries(SERVICES.map((s) => [s.id, null]))
   );
+  // Per-slide title-hide timer: starts when landing on a project slide
+  const titleHideTimerRef = useRef<Record<string, ReturnType<typeof setTimeout> | null>>(
+    Object.fromEntries(SERVICES.map((s) => [s.id, null]))
+  );
+  // Tracks whether the one-time auto-advance has fired
+  const hasAutoAdvancedRef = useRef<Record<string, boolean>>(
+    Object.fromEntries(SERVICES.map((s) => [s.id, false]))
+  );
 
-  const startAutoPlay = useCallback((svcId: string) => {
-    if (timerRefs.current[svcId] !== null) {
-      clearInterval(timerRefs.current[svcId]!);
-    }
-    const totalSlides = SERVICES.find((s) => s.id === svcId)!.projects.length + 1;
-    timerRefs.current[svcId] = setInterval(() => {
-      setSlideMap((prev) => ({
-        ...prev,
-        [svcId]: (prev[svcId] + 1) % totalSlides,
-      }));
-    }, 3500);
+  const startTitleHideTimer = useCallback((svcId: string) => {
+    if (titleHideTimerRef.current[svcId]) clearTimeout(titleHideTimerRef.current[svcId]!);
+    setTitleVisible((prev) => ({ ...prev, [svcId]: true }));
+    titleHideTimerRef.current[svcId] = setTimeout(() => {
+      setTitleVisible((prev) => ({ ...prev, [svcId]: false }));
+    }, 5000);
   }, []);
 
-  // Start auto-play when section enters viewport
-  useEffect(() => {
-    visible.forEach((svcId) => {
-      if (timerRefs.current[svcId] === null) {
-        startAutoPlay(svcId);
-      }
-    });
-  }, [visible, startAutoPlay]);
-
-  // Intersection observer
+  // Intersection observer — triggers entrance animation and one-time auto-advance
   useEffect(() => {
     const observers: IntersectionObserver[] = [];
     SERVICES.forEach((svc) => {
@@ -195,8 +199,18 @@ export default function ServiceSections() {
       if (!el) return;
       const obs = new IntersectionObserver(
         ([entry]) => {
-          if (entry.isIntersecting)
+          if (entry.isIntersecting) {
             setVisible((prev) => new Set([...prev, svc.id]));
+            // Fire one-time auto-advance to project 1 after 3s
+            if (!hasAutoAdvancedRef.current[svc.id]) {
+              hasAutoAdvancedRef.current[svc.id] = true;
+              autoAdvanceTimerRef.current[svc.id] = setTimeout(() => {
+                slideMapRef.current = { ...slideMapRef.current, [svc.id]: 1 };
+                setSlideMap((prev) => ({ ...prev, [svc.id]: 1 }));
+                startTitleHideTimer(svc.id);
+              }, 3000);
+            }
+          }
         },
         { threshold: 0.45, root: scrollRef.current }
       );
@@ -204,12 +218,16 @@ export default function ServiceSections() {
       observers.push(obs);
     });
     return () => observers.forEach((o) => o.disconnect());
-  }, []);
+  }, [startTitleHideTimer]);
 
-  // Cleanup timers on unmount
+  // Cleanup all timers on unmount
   useEffect(() => {
-    const refs = timerRefs.current;
-    return () => Object.values(refs).forEach((t) => { if (t) clearInterval(t); });
+    const autoRefs = autoAdvanceTimerRef.current;
+    const titleRefs = titleHideTimerRef.current;
+    return () => {
+      Object.values(autoRefs).forEach((t) => { if (t) clearTimeout(t); });
+      Object.values(titleRefs).forEach((t) => { if (t) clearTimeout(t); });
+    };
   }, []);
 
   // Close modals on Escape
@@ -223,14 +241,35 @@ export default function ServiceSections() {
 
   const navigate = useCallback((svcId: string, dir: "prev" | "next") => {
     const totalSlides = SERVICES.find((s) => s.id === svcId)!.projects.length + 1;
-    setSlideMap((prev) => {
-      const next = dir === "next"
-        ? (prev[svcId] + 1) % totalSlides
-        : (prev[svcId] - 1 + totalSlides) % totalSlides;
-      return { ...prev, [svcId]: next };
-    });
-    startAutoPlay(svcId);
-  }, [startAutoPlay]);
+    const current = slideMapRef.current[svcId];
+    const next = dir === "next"
+      ? (current + 1) % totalSlides
+      : (current - 1 + totalSlides) % totalSlides;
+
+    slideMapRef.current = { ...slideMapRef.current, [svcId]: next };
+    setSlideMap((prev) => ({ ...prev, [svcId]: next }));
+
+    if (next === 0) {
+      // Back to intro — clear hide timer, restore title
+      if (titleHideTimerRef.current[svcId]) clearTimeout(titleHideTimerRef.current[svcId]!);
+      setTitleVisible((prev) => ({ ...prev, [svcId]: true }));
+    } else {
+      // Project slide — show title, then hide after 5s
+      startTitleHideTimer(svcId);
+    }
+  }, [startTitleHideTimer]);
+
+  const goToSlide = useCallback((svcId: string, idx: number) => {
+    slideMapRef.current = { ...slideMapRef.current, [svcId]: idx };
+    setSlideMap((prev) => ({ ...prev, [svcId]: idx }));
+
+    if (idx === 0) {
+      if (titleHideTimerRef.current[svcId]) clearTimeout(titleHideTimerRef.current[svcId]!);
+      setTitleVisible((prev) => ({ ...prev, [svcId]: true }));
+    } else {
+      startTitleHideTimer(svcId);
+    }
+  }, [startTitleHideTimer]);
 
   return (
     <>
@@ -253,12 +292,12 @@ export default function ServiceSections() {
         {SERVICES.map((svc, svcIdx) => {
           const currentSlide = slideMap[svc.id];
           const isVis = visible.has(svc.id);
+          const isTitleVisible = titleVisible[svc.id];
           const totalSlides = svc.projects.length + 1;
 
-          // Build slide data: slide 0 = intro, slides 1..N = projects
           const slides = [
             { isIntro: true as const },
-            ...svc.projects.map((p, i) => ({ isIntro: false as const, proj: p, projIdx: i })),
+            ...svc.projects.map((p) => ({ isIntro: false as const, proj: p })),
           ];
 
           return (
@@ -327,15 +366,23 @@ export default function ServiceSections() {
                           </>
                         ) : (
                           <>
-                            <h2
-                              className="font-[family-name:var(--font-bebas)] leading-[0.88] tracking-[0.02em] text-white"
-                              style={{ fontSize: "clamp(2.5rem, 11vw, 8rem)" }}
+                            {/* Title + description fade out after 5s to reveal background video */}
+                            <div
+                              style={{
+                                opacity: isTitleVisible ? 1 : 0,
+                                transition: "opacity 1s ease",
+                              }}
                             >
-                              {slide.proj.title}
-                            </h2>
-                            <p className="text-white/50 text-sm mt-3 max-w-sm truncate">
-                              {slide.proj.description}
-                            </p>
+                              <h2
+                                className="font-[family-name:var(--font-bebas)] leading-[0.88] tracking-[0.02em] text-white"
+                                style={{ fontSize: "clamp(2.5rem, 11vw, 8rem)" }}
+                              >
+                                {slide.proj.title}
+                              </h2>
+                              <p className="text-white/50 text-sm mt-3 max-w-sm truncate">
+                                {slide.proj.description}
+                              </p>
+                            </div>
                             {/* Video thumbnail if media exists */}
                             {slide.proj.videoUrl && (
                               <div
@@ -367,10 +414,7 @@ export default function ServiceSections() {
                   {Array.from({ length: totalSlides }).map((_, i) => (
                     <button
                       key={i}
-                      onClick={() => {
-                        setSlideMap((prev) => ({ ...prev, [svc.id]: i }));
-                        startAutoPlay(svc.id);
-                      }}
+                      onClick={() => goToSlide(svc.id, i)}
                       aria-label={`Slide ${i + 1}`}
                       className="rounded-full transition-all duration-300"
                       style={{
