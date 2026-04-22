@@ -11,6 +11,7 @@ type Project = {
   client: string;
   year: string;
   videoUrl?: string;
+  image?: string;
 };
 
 type PricingPackage = {
@@ -27,6 +28,7 @@ type ServiceDef = {
   description: string;
   packages: PricingPackage[];
   projects: Project[];
+  sectionVideo?: string;
 };
 
 const SERVICES: ServiceDef[] = [
@@ -35,6 +37,7 @@ const SERVICES: ServiceDef[] = [
     heading: ["MUSIC VIDEOS"],
     price: "Starting at $2,000",
     description: "Full-scale music video production from concept to final delivery.",
+    sectionVideo: "https://youtu.be/KWoTyfPsqbE",
     packages: [
       {
         name: "Essential",
@@ -61,9 +64,9 @@ const SERVICES: ServiceDef[] = [
       },
     ],
     projects: [
-      { title: "Music Video 1", description: "High-energy visual featuring artist performance across multiple locations.", client: "Artist / Label", year: "2024" },
-      { title: "Music Video 2", description: "Cinematic narrative piece with choreographed sequences and dynamic lighting.", client: "Artist / Label", year: "2024" },
-      { title: "Music Video 3", description: "Concept-driven production blending performance with abstract visual elements.", client: "Artist / Label", year: "2023" },
+      { title: "Music Video 1", description: "High-energy visual featuring artist performance across multiple locations.", client: "Artist / Label", year: "2024", videoUrl: "https://youtu.be/WqTO4uk1siU" },
+      { title: "Music Video 2", description: "Cinematic narrative piece with choreographed sequences and dynamic lighting.", client: "Artist / Label", year: "2024", videoUrl: "https://youtu.be/N5dOy9FGtDg" },
+      { title: "Music Video 3", description: "Concept-driven production blending performance with abstract visual elements.", client: "Artist / Label", year: "2023", videoUrl: "https://youtu.be/FCUk7rIBBAE" },
     ],
   },
   {
@@ -85,7 +88,7 @@ const SERVICES: ServiceDef[] = [
       },
     ],
     projects: [
-      { title: "Reel 1", description: "Fast-paced social content optimized for Instagram Reels and TikTok.", client: "Creator / Brand", year: "2024" },
+      { title: "Reel 1", description: "Fast-paced social content optimized for Instagram Reels and TikTok.", client: "Creator / Brand", year: "2024", videoUrl: "https://www.youtube.com/shorts/UbJLWJTDEis" },
       { title: "Reel 2", description: "Behind-the-scenes brand content capturing authentic moments and highlights.", client: "Creator / Brand", year: "2024" },
       { title: "Reel 3", description: "Lifestyle reel series featuring the artist in dynamic urban environments.", client: "Creator / Brand", year: "2024" },
     ],
@@ -109,7 +112,7 @@ const SERVICES: ServiceDef[] = [
       },
     ],
     projects: [
-      { title: "DJ Set 1", description: "Multi-camera live session at an intimate venue with professional audio mix.", client: "DJ Name", year: "2024" },
+      { title: "DJ Set 1", description: "Multi-camera live session at an intimate venue with professional audio mix.", client: "DJ Name", year: "2024", videoUrl: "https://youtu.be/mzu5kHKFkqs" },
       { title: "DJ Set 2", description: "High-energy rooftop performance captured with cinematic drone and ground angles.", client: "DJ Name", year: "2024" },
       { title: "DJ Set 3", description: "Studio livestream session featuring guest appearances and exclusive transitions.", client: "DJ Name", year: "2024" },
     ],
@@ -133,9 +136,9 @@ const SERVICES: ServiceDef[] = [
       },
     ],
     projects: [
-      { title: "Editorial 1", description: "Fashion editorial exploring texture and contrast through bold wardrobe choices.", client: "Brand / Artist", year: "2024" },
-      { title: "Editorial 2", description: "Artist portrait series with environmental storytelling and natural lighting.", client: "Brand / Artist", year: "2024" },
-      { title: "Editorial 3", description: "Brand campaign shoot delivering commercial-grade imagery for digital and print.", client: "Brand / Artist", year: "2024" },
+      { title: "Editorial 1", description: "Fashion editorial exploring texture and contrast through bold wardrobe choices.", client: "Brand / Artist", year: "2024", image: "/editorials/editorial-1.jpg" },
+      { title: "Editorial 2", description: "Artist portrait series with environmental storytelling and natural lighting.", client: "Brand / Artist", year: "2024", image: "/editorials/editorial-2.jpg" },
+      { title: "Editorial 3", description: "Brand campaign shoot delivering commercial-grade imagery for digital and print.", client: "Brand / Artist", year: "2024", image: "/editorials/editorial-3.jpg" },
     ],
   },
 ];
@@ -380,12 +383,24 @@ export default function ServiceSections() {
       >
         {/* ── Hero section ──────────────────────────────────────────────── */}
         <section
-          className="relative snap-start snap-always bg-black flex flex-col items-center justify-center"
+          className="relative snap-start snap-always bg-black flex flex-col items-center justify-center overflow-hidden"
           style={{ height: "100dvh" }}
         >
-          {/* Tagline — Anton font, fills the screen width like the screenshot */}
+          {/* YouTube background */}
+          <div className="absolute inset-0 pointer-events-none overflow-hidden">
+            <iframe
+              src="https://www.youtube.com/embed/msI9QwLgUys?autoplay=1&mute=1&loop=1&playlist=msI9QwLgUys&controls=0&showinfo=0&rel=0&modestbranding=1&playsinline=1"
+              className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2"
+              style={{ width: "177.78vh", height: "100vh", minWidth: "100%", minHeight: "56.25vw" }}
+              allow="autoplay"
+              title="Hero background video"
+            />
+          </div>
+          <div className="absolute inset-0 bg-black/55 pointer-events-none" />
+
+          {/* Tagline */}
           <p
-            className="font-[family-name:var(--font-anton)] text-[#F58A2C] text-center leading-[1.05] px-6 sm:px-10 uppercase"
+            className="relative font-[family-name:var(--font-anton)] text-[#F58A2C] text-center leading-[1.05] px-6 sm:px-10 uppercase"
             style={{ fontSize: "clamp(2.4rem, 7.5vw, 6rem)", maxWidth: "900px" }}
           >
             Documenting the Human Experience in the Most Beautiful Way Possible
@@ -444,15 +459,18 @@ export default function ServiceSections() {
               >
                 {/* Slide area */}
                 <div
-                  className="relative overflow-hidden w-full px-16 sm:px-24"
-                  style={{ height: "min(260px, 40vh)" }}
+                  className="relative overflow-hidden w-full"
+                  style={{ height: "min(340px, 50vh)" }}
                 >
                   {slides.map((slide, i) => {
                     const delta = i - currentSlide;
+                    const bgSrc = slide.isIntro
+                      ? (svc.sectionVideo ? getThumb(svc.sectionVideo) : null)
+                      : (slide.proj.videoUrl ? getThumb(slide.proj.videoUrl) : slide.proj.image ?? null);
                     return (
                       <div
                         key={i}
-                        className="absolute inset-0 flex flex-col items-center justify-center text-center px-4"
+                        className="absolute inset-0"
                         style={{
                           transform: `translateX(${delta * 110}%)`,
                           opacity: delta === 0 ? 1 : 0,
@@ -460,65 +478,72 @@ export default function ServiceSections() {
                           pointerEvents: delta === 0 ? "auto" : "none",
                         }}
                       >
-                        {slide.isIntro ? (
+                        {/* Full-slide background */}
+                        {bgSrc && (
                           <>
-                            {svc.heading.map((line, li) => (
-                              <h2
-                                key={li}
-                                className="font-[family-name:var(--font-bebas)] leading-[0.88] tracking-[0.02em] text-white"
-                                style={{ fontSize: "clamp(2.5rem, 11vw, 8rem)" }}
-                              >
-                                {line}
-                              </h2>
-                            ))}
-                            <p className="text-white text-xs tracking-[0.2em] uppercase font-light mt-3">
-                              {svc.price}
-                            </p>
-                          </>
-                        ) : (
-                          <>
-                            {/* Title — fades out after 5s (minimized title appears above dots) */}
-                            <h2
-                              className="font-[family-name:var(--font-bebas)] leading-[0.88] tracking-[0.02em] text-white"
-                              style={{
-                                fontSize: "clamp(2.5rem, 11vw, 8rem)",
-                                opacity: isTitleVisible ? 1 : 0,
-                                transition: "opacity 1s ease",
-                              }}
-                            >
-                              {slide.proj.title}
-                            </h2>
-                            {/* Description — fades out after 5s, stays hidden */}
-                            <div
-                              style={{
-                                opacity: isTitleVisible ? 1 : 0,
-                                transition: "opacity 1s ease",
-                              }}
-                            >
-                              <p className="text-white/50 text-sm mt-3 max-w-sm truncate">
-                                {slide.proj.description}
-                              </p>
-                            </div>
-                            {slide.proj.videoUrl && (
-                              <div
-                                className="relative mt-4 w-48 aspect-video overflow-hidden cursor-pointer group"
-                                onClick={() => setVideoModal(slide.proj.videoUrl!)}
-                              >
-                                {getThumb(slide.proj.videoUrl) && (
-                                  <Image
-                                    src={getThumb(slide.proj.videoUrl)!}
-                                    alt={slide.proj.title}
-                                    fill
-                                    className="object-cover"
-                                  />
-                                )}
-                                <div className="absolute inset-0 flex items-center justify-center bg-black/30 opacity-0 group-hover:opacity-100 transition-opacity">
-                                  <Play size={14} fill="currentColor" className="text-white" />
-                                </div>
-                              </div>
-                            )}
+                            <Image src={bgSrc} alt="" fill className="object-cover" />
+                            <div className="absolute inset-0 bg-black/55" />
                           </>
                         )}
+
+                        {/* Content overlay */}
+                        <div className="absolute inset-0 flex flex-col items-center justify-center text-center px-6">
+                          {slide.isIntro ? (
+                            <>
+                              {svc.heading.map((line, li) => (
+                                <h2
+                                  key={li}
+                                  className="font-[family-name:var(--font-bebas)] leading-[0.88] tracking-[0.02em] text-white"
+                                  style={{ fontSize: "clamp(2.5rem, 11vw, 8rem)" }}
+                                >
+                                  {line}
+                                </h2>
+                              ))}
+                              <p className="text-white text-xs tracking-[0.2em] uppercase font-light mt-3">
+                                {svc.price}
+                              </p>
+                              {svc.sectionVideo && (
+                                <button
+                                  onClick={() => setVideoModal(svc.sectionVideo!)}
+                                  className="mt-5 w-11 h-11 border border-white/40 flex items-center justify-center hover:border-[#F58A2C] hover:text-[#F58A2C] transition-colors duration-200"
+                                >
+                                  <Play size={15} fill="currentColor" />
+                                </button>
+                              )}
+                            </>
+                          ) : (
+                            <>
+                              {/* Play button */}
+                              {slide.proj.videoUrl && (
+                                <button
+                                  onClick={() => setVideoModal(slide.proj.videoUrl!)}
+                                  className="mb-4 w-14 h-14 border border-white/40 flex items-center justify-center hover:border-[#F58A2C] hover:text-[#F58A2C] transition-colors duration-200"
+                                >
+                                  <Play size={20} fill="currentColor" />
+                                </button>
+                              )}
+
+                              {/* Title — fades out after 5s */}
+                              <h2
+                                className="font-[family-name:var(--font-bebas)] leading-[0.88] tracking-[0.02em] text-white"
+                                style={{
+                                  fontSize: "clamp(2.5rem, 11vw, 8rem)",
+                                  opacity: isTitleVisible ? 1 : 0,
+                                  transition: "opacity 1s ease",
+                                }}
+                              >
+                                {slide.proj.title}
+                              </h2>
+
+                              {/* Description — fades out after 5s */}
+                              <div style={{ opacity: isTitleVisible ? 1 : 0, transition: "opacity 1s ease" }}>
+                                <p className="text-white/60 text-sm mt-2 max-w-sm truncate">
+                                  {slide.proj.description}
+                                </p>
+                              </div>
+                            </>
+                          )}
+                        </div>
                       </div>
                     );
                   })}
@@ -654,9 +679,9 @@ export default function ServiceSections() {
           transition: "transform 0.45s cubic-bezier(0.16,1,0.3,1)",
         }}
       >
-        <div className="mb-8 bg-[#F58A2C] text-white text-sm font-semibold tracking-[0.12em] px-10 py-4 whitespace-nowrap">
+        <p className="mb-10 text-white text-sm font-semibold tracking-[0.12em] whitespace-nowrap" style={{ textShadow: "0 1px 8px rgba(0,0,0,0.8)" }}>
           Thanks for watching 🎉
-        </div>
+        </p>
       </div>
 
       {/* ── Pricing modal ────────────────────────────────────────────────── */}
