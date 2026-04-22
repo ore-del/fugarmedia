@@ -203,6 +203,7 @@ export default function ServiceSections() {
   const flashTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const thanksTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const scrollingRef = useRef(false);
+  const dragRef = useRef<{ x: number; y: number }>({ x: 0, y: 0 });
 
   const startTitleHideTimer = useCallback((svcId: string) => {
     if (titleHideTimerRef.current[svcId]) clearTimeout(titleHideTimerRef.current[svcId]!);
@@ -456,6 +457,17 @@ export default function ServiceSections() {
               key={svc.id}
               className="relative snap-start snap-always bg-black flex flex-col items-center justify-center overflow-hidden"
               style={{ height: "100dvh" }}
+              onTouchStart={(e) => { dragRef.current = { x: e.touches[0].clientX, y: e.touches[0].clientY }; }}
+              onTouchEnd={(e) => {
+                const dx = dragRef.current.x - e.changedTouches[0].clientX;
+                const dy = dragRef.current.y - e.changedTouches[0].clientY;
+                if (Math.abs(dx) > Math.abs(dy) && Math.abs(dx) > 40) navigate(svc.id, dx > 0 ? "next" : "prev");
+              }}
+              onMouseDown={(e) => { dragRef.current = { x: e.clientX, y: e.clientY }; }}
+              onMouseUp={(e) => {
+                const dx = dragRef.current.x - e.clientX;
+                if (Math.abs(dx) > 40) navigate(svc.id, dx > 0 ? "next" : "prev");
+              }}
             >
               {/* ── Full-section background — video (autoplay muted) or image ── */}
               {isInView && activeBgVideoId && (
@@ -570,7 +582,7 @@ export default function ServiceSections() {
 
                             {/* Description — fades out after 5s */}
                             <div style={{ opacity: isTitleVisible ? 1 : 0, transition: "opacity 1s ease" }}>
-                              <p className="text-white/80 text-sm mt-2 max-w-sm truncate" style={{ textShadow: "0 1px 8px rgba(0,0,0,0.9)" }}>
+                              <p className="text-white/80 text-sm mt-2 leading-snug" style={{ maxWidth: "calc(100vw - 7rem)", textShadow: "0 1px 8px rgba(0,0,0,0.9)" }}>
                                 {slide.proj.description}
                               </p>
                             </div>
