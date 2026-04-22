@@ -634,7 +634,7 @@ export default function ServiceSections() {
 
         {/* ── CTA snap section ──────────────────────────────────────────── */}
         <footer
-          className="snap-start snap-always bg-[#080808] flex flex-col items-center justify-center"
+          className="snap-start snap-always bg-[#080808] flex flex-col items-center justify-center relative"
           style={{ height: "100dvh" }}
         >
           <div className="flex flex-col items-center text-center px-6">
@@ -658,6 +658,20 @@ export default function ServiceSections() {
               <ArrowRight size={14} className="group-hover:translate-x-0.5 transition-transform" />
             </a>
           </div>
+
+          {/* Signature — fades out before teaser appears */}
+          <a
+            href="https://worldcup.la-fleur.digital/"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="absolute bottom-8 left-1/2 -translate-x-1/2"
+            style={{
+              opacity: thanksVisible ? 0 : 1,
+              transition: thanksVisible ? "opacity 0.2s ease" : "opacity 0.5s ease 0.1s",
+            }}
+          >
+            <Image src="/signature-link.svg" alt="Design by La Fleur" width={162} height={20} />
+          </a>
         </footer>
       </div>
 
